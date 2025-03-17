@@ -88,7 +88,10 @@ const CryptoChart: React.FC<CryptoChartProps> = ({
     if (price < 0.01) return `$${price.toFixed(6)}`;
     if (price < 1) return `$${price.toFixed(4)}`;
     if (price < 1000) return `$${price.toFixed(2)}`;
-    return `$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+    return `$${price.toLocaleString("en-US", { 
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2 
+    })}`;
   };
 
   // Custom tooltip formatter

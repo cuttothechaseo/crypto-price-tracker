@@ -42,7 +42,10 @@ const CoinCard: React.FC<CoinCardProps> = ({ coin }) => {
       <div className="w-full flex justify-between items-center my-2">
         <span className="text-gray-600 dark:text-gray-400 font-medium">Price:</span>
         <span className="text-xl font-bold text-gray-800 dark:text-white">
-          ${coin.current_price.toLocaleString()}
+          ${coin.current_price.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}
         </span>
       </div>
       
@@ -123,7 +126,10 @@ function formatMarketCap(marketCap: number): string {
   } else if (marketCap >= 1e6) {
     return (marketCap / 1e6).toFixed(2) + 'M';
   } else {
-    return marketCap.toLocaleString();
+    return marketCap.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
   }
 }
 

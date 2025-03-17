@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CryptoCoin } from '../types';
+import { CryptoCoin, PriceHistoryData } from '../types';
 
 // Constants for API request
 const MIN_REQUEST_INTERVAL = 10000; // 10 seconds between requests
@@ -101,7 +101,7 @@ export const fetchCryptoHistory = async (coinId: string, days: number = 7): Prom
 
     if (!response.data || !response.data.prices || !Array.isArray(response.data.prices)) {
       console.error('Invalid historical data response:', response.data);
-      return getMockHistoryData(coinId, days);
+      return [];
     }
 
     // Transform the data
@@ -133,30 +133,6 @@ export const fetchCryptoHistory = async (coinId: string, days: number = 7): Prom
       console.error('Error fetching historical data:', error);
     }
     
-    return getMockHistoryData(coinId, days);
+    return [];
   }
-};
-
-// Helper function to get mock historical data for a specific coin
-function getMockHistoryData(coinId: string, days: number = 7): PriceHistoryData[] {
-  // Check if we have pre-generated mock data for this coin
-  if (mockHistoryMap[coinId]) {
-    // If we need different timeframe than the default 7 days
-    if (days !== 7) {
-      const coin = mockCryptoData.find(c => c.id === coinId);
-      const basePrice = coin ? coin.current_price : 1000;
-      const trend = coin ? (coin.price_change_percentage_24h / 100) : 0;
-      
-      return generateMockHistoryForCoin(basePrice, 0.05, trend, days);
-    }
-    
-    return mockHistoryMap[coinId];
-  }
-  
-  // If no pre-generated data, create some based on the coin's current price
-  const coin = mockCryptoData.find(c => c.id === coinId);
-  const basePrice = coin ? coin.current_price : 1000;
-  const trend = coin ? (coin.price_change_percentage_24h / 100) : 0;
-  
-  return generateMockHistoryForCoin(basePrice, 0.05, trend, days);
-} 
+}; 

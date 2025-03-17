@@ -11,30 +11,32 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-10">
+    <nav className="bg-darkBackground border-b border-cyberPurple/30 shadow-glow-purple sticky top-0 z-10 backdrop-blur-sm">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <div className="relative w-8 h-8 mr-2">
+          <div className="flex items-center group">
+            <div className="relative w-8 h-8 mr-2 transition-all duration-300 group-hover:scale-110">
               <Image
                 src="/images/bitcoin-logo.svg"
                 alt="Bitcoin Logo"
                 width={32}
                 height={32}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain animate-pulse-slow"
                 priority
               />
             </div>
-            <span className="font-bold text-xl text-gray-900 dark:text-white">Crypto Price Tracker</span>
+            <span className="font-bold text-xl font-['Orbitron'] text-transparent bg-clip-text bg-gradient-to-r from-cyberPurple to-electricBlue transition-all duration-300 group-hover:scale-105 group-hover:animate-glow">
+              Crypto Price Tracker
+            </span>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-6">
             <ThemeToggle onThemeChange={handleThemeChange} />
             <a 
               href="https://www.coingecko.com/en/api" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400"
+              className="text-electricBlue hover:text-white hover:shadow-glow-blue transition-all duration-300"
             >
               API
             </a>
@@ -42,7 +44,7 @@ const Navbar: React.FC = () => {
               href="https://github.com" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-primary-400"
+              className="text-neonPink hover:text-white hover:shadow-glow-pink transition-all duration-300"
             >
               GitHub
             </a>

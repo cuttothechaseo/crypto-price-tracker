@@ -1,8 +1,9 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { SortOrder, useCryptoStore } from '../store/useCryptoStore';
 
 const SortDropdown: React.FC = () => {
   const { sortOrder, setSortOrder } = useCryptoStore();
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value as SortOrder;
@@ -11,16 +12,18 @@ const SortDropdown: React.FC = () => {
   }, [setSortOrder]);
 
   return (
-    <div className="flex items-center space-x-2 mb-6">
-      <label htmlFor="sort-order" className="text-gray-700 dark:text-gray-300 font-medium">
-        Sort by:
+    <div className="flex items-center space-x-3 mb-8">
+      <label htmlFor="sort-order" className="text-electricBlue font-['Orbitron'] font-medium text-sm">
+        SORT BY:
       </label>
-      <div className="relative">
+      <div className={`relative transition-all duration-300 ${isFocused ? 'shadow-glow-purple' : ''}`}>
         <select
           id="sort-order"
           value={sortOrder}
           onChange={handleChange}
-          className="appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md py-2 pl-3 pr-10 text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          className="appearance-none bg-darkBackground border border-cyberPurple/50 rounded-md py-2.5 pl-4 pr-12 text-sm font-medium text-white focus:outline-none focus:border-cyberPurple font-['Exo_2'] transition-all duration-300 hover:border-cyberPurple"
         >
           <option value="market_cap_desc">Market Cap (High-Low)</option>
           <option value="market_cap_asc">Market Cap (Low-High)</option>
@@ -29,7 +32,7 @@ const SortDropdown: React.FC = () => {
           <option value="name_asc">Name (A-Z)</option>
           <option value="name_desc">Name (Z-A)</option>
         </select>
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-cyberPurple">
           <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
@@ -38,6 +41,12 @@ const SortDropdown: React.FC = () => {
             />
           </svg>
         </div>
+        
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-1 h-1 bg-cyberPurple"></div>
+        <div className="absolute top-0 right-0 w-1 h-1 bg-electricBlue"></div>
+        <div className="absolute bottom-0 left-0 w-1 h-1 bg-electricBlue"></div>
+        <div className="absolute bottom-0 right-0 w-1 h-1 bg-cyberPurple"></div>
       </div>
     </div>
   );

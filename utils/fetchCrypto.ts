@@ -1,207 +1,74 @@
 import axios from 'axios';
-import { mockCryptoData } from './mockData';
-import { generateMockHistoryForCoin, mockHistoryMap } from './mockHistoryData';
 import { CryptoCoin } from '../types';
-import { mockGlobalData } from './mockGlobalData';
 
-// We're using the same interface for both the API response and our internal data type
-export type CryptoData = CryptoCoin;
+// Constants for API request
+const MIN_REQUEST_INTERVAL = 10000; // 10 seconds between requests
+let lastApiRequest = 0;
 
-export interface PriceHistoryData {
-  timestamp: number;
-  price: number;
-}
-
-// Flag to control whether to use mock data when API fails
-const USE_MOCK_ON_FAILURE = true;
-
-// Define a global pending requests tracking mechanism
-type RequestType = 'markets' | 'global' | 'trending' | 'coin';
-const pendingRequests: Record<RequestType, Promise<any> | null> = {
-  markets: null,
-  global: null,
-  trending: null,
-  coin: null
-};
-
-// Function to log API status for monitoring
-function logApiStatus(endpoint: string, success: boolean, error?: any) {
-  if (success) {
-    console.log(`✅ CoinGecko API (${endpoint}) is responding normally`);
-  } else {
-    console.warn(`⚠️ CoinGecko API (${endpoint}) request failed: ${error?.message || 'Unknown error'}`);
-  }
-}
-
-// Fetch cryptocurrency market data
-export async function fetchCryptoData(): Promise<CryptoCoin[]> {
+/**
+ * Fetches cryptocurrency data from the CoinGecko API
+ */
+export const fetchCryptoData = async (): Promise<CryptoCoin[]> => {
   try {
-    // If there's already a pending request for this endpoint, return that instead of making a new one
-    if (pendingRequests.markets) {
-      console.log('Using existing pending request for markets data');
-      return await pendingRequests.markets;
+    // Check if we're making requests too frequently
+    const now = Date.now();
+    if (now - lastApiRequest < MIN_REQUEST_INTERVAL) {
+      console.warn('API requests too frequent, throttling');
+      return [];
     }
-
+    
+    lastApiRequest = now;
     console.log('Fetching cryptocurrency data from CoinGecko API...');
     
-    // Create a new request and store the promise
-    const requestPromise = axios.get('/api/crypto?endpoint=markets', {
-      timeout: 20000 // 20 second timeout
-    })
-    .then(response => {
-      if (!response.data || !Array.isArray(response.data)) {
-        console.error('Invalid response format from API');
-        throw new Error('Invalid response format');
-      }
-      logApiStatus('markets', true);
-      return response.data;
-    })
-    .finally(() => {
-      // Clear the pending request once it's completed (success or error)
-      pendingRequests.markets = null;
-    });
-    
-    // Store the promise so concurrent calls can use it
-    pendingRequests.markets = requestPromise;
-    
-    return await requestPromise;
-  } catch (error) {
-    logApiStatus('markets', false, error);
-    console.error('Error fetching crypto data:', error);
-    
-    // Use mock data if enabled and actual request failed
-    if (USE_MOCK_ON_FAILURE) {
-      console.log('Using mock cryptocurrency data as fallback');
-      return mockCryptoData as CryptoCoin[];
-    }
-    
-    throw error;
-  }
-}
-
-// Fetch global market data
-export async function fetchGlobalMarketData() {
-  try {
-    // If there's already a pending request for this endpoint, return that instead of making a new one
-    if (pendingRequests.global) {
-      console.log('Using existing pending request for global market data');
-      return await pendingRequests.global;
-    }
-    
-    // Create a new request and store the promise
-    const requestPromise = axios.get('/api/crypto?endpoint=global', {
-      timeout: 20000
-    })
-    .then(response => {
-      if (!response.data || !response.data.data) {
-        console.error('Invalid global market data response format');
-        throw new Error('Invalid global market data response');
-      }
-      logApiStatus('global', true);
-      return response.data.data;
-    })
-    .finally(() => {
-      // Clear the pending request once it's completed
-      pendingRequests.global = null;
-    });
-    
-    // Store the promise so concurrent calls can use it
-    pendingRequests.global = requestPromise;
-    
-    return await requestPromise;
-  } catch (error) {
-    logApiStatus('global', false, error);
-    console.error('Error fetching global market data:', error);
-    
-    // Use mock data if enabled and actual request failed
-    if (USE_MOCK_ON_FAILURE) {
-      console.log('Using mock global market data as fallback');
-      return mockGlobalData;
-    }
-    
-    throw error;
-  }
-}
-
-// Fetch trending coins data
-export async function fetchTrendingCoins(): Promise<CryptoCoin[]> {
-  try {
-    // If there's already a pending request for this endpoint, return that instead of making a new one
-    if (pendingRequests.trending) {
-      console.log('Using existing pending request for trending coins');
-      return await pendingRequests.trending;
-    }
-    
-    // Create a new request and store the promise
-    const requestPromise = axios.get('/api/crypto?endpoint=trending', {
-      timeout: 20000
-    })
-    .then(async response => {
-      if (!response.data || !response.data.coins) {
-        console.error('Invalid trending coins response format');
-        throw new Error('Invalid trending coins response');
-      }
-      
-      const coinIds = response.data.coins
-        .map((coin: any) => coin.item.id)
-        .slice(0, 7);
-      
-      if (coinIds.length === 0) {
-        console.warn('No trending coin IDs found');
-        return [];
-      }
-      
-      // Then fetch detailed data for those coins using our proxy
-      const idsParam = coinIds.join(',');
-      const detailedResponse = await axios.get('/api/crypto', {
+    const response = await axios.get(
+      'https://api.coingecko.com/api/v3/coins/markets',
+      {
         params: {
-          endpoint: 'markets',
-          ids: idsParam,
+          vs_currency: 'usd',
+          order: 'market_cap_desc',
+          per_page: 100,
+          page: 1,
+          sparkline: true,
+          price_change_percentage: '7d',
         },
-        timeout: 20000
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        timeout: 10000 // 10 second timeout
+      }
+    );
+
+    if (!response.data || !Array.isArray(response.data)) {
+      console.error('Invalid response format:', response.data);
+      return [];
+    }
+
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error fetching crypto data:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data
       });
       
-      if (!detailedResponse.data || !Array.isArray(detailedResponse.data)) {
-        console.error('Invalid coin details response format');
-        throw new Error('Invalid coin details response');
+      // Handle rate limiting (common with CoinGecko free tier)
+      if (error.response?.status === 429) {
+        console.error('Rate limit exceeded.');
       }
       
-      logApiStatus('trending', true);
-      return detailedResponse.data;
-    })
-    .finally(() => {
-      // Clear the pending request once it's completed
-      pendingRequests.trending = null;
-    });
-    
-    // Store the promise so concurrent calls can use it
-    pendingRequests.trending = requestPromise;
-    
-    return await requestPromise;
-  } catch (error) {
-    logApiStatus('trending', false, error);
-    console.error('Error fetching trending coins:', error);
-    
-    // Use mock data if enabled and actual request failed
-    if (USE_MOCK_ON_FAILURE) {
-      console.log('Using mock trending coins data as fallback');
-      // Return top 7 coins by market cap as trending coins
-      return mockCryptoData
-        .slice(0, 7)
-        .sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h) as CryptoCoin[];
+      // Handle timeout errors more specifically
+      if (error.code === 'ECONNABORTED') {
+        console.error('API request timed out.');
+      }
+    } else {
+      console.error('Error fetching crypto data:', error);
     }
     
-    throw error;
+    return [];
   }
-}
-
-// Get top gainers from a list of coins
-export function getTopGainers(coins: CryptoCoin[], limit: number = 3): CryptoCoin[] {
-  return [...coins]
-    .filter(coin => !isNaN(coin.price_change_percentage_24h))
-    .sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h)
-    .slice(0, limit);
-}
+};
 
 // Store historical data cache to minimize API calls
 const historyCache: Record<string, { data: PriceHistoryData[], timestamp: number }> = {};
@@ -220,54 +87,53 @@ export const fetchCryptoHistory = async (coinId: string, days: number = 7): Prom
       return cachedData.data;
     }
     
-    // If there's already a pending request for this coin, return that instead of making a new one
-    const coinRequestKey = `coin-${coinId}-${days}` as RequestType;
-    if (pendingRequests.coin) {
-      console.log(`Using existing pending request for coin ${coinId}`);
-      return await pendingRequests.coin;
+    // If no cached data or cache is stale, fetch from API
+    const response = await axios.get(
+      `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        timeout: 10000
+      }
+    );
+
+    if (!response.data || !response.data.prices || !Array.isArray(response.data.prices)) {
+      console.error('Invalid historical data response:', response.data);
+      return getMockHistoryData(coinId, days);
+    }
+
+    // Transform the data
+    const historyData = response.data.prices.map((priceData: [number, number]) => ({
+      timestamp: priceData[0],
+      price: priceData[1]
+    }));
+
+    // Cache the data
+    historyCache[cacheKey] = {
+      data: historyData,
+      timestamp: now
+    };
+
+    return historyData;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error fetching historical data:', {
+        coinId,
+        message: error.message,
+        status: error.response?.status
+      });
+      
+      // Handle rate limiting
+      if (error.response?.status === 429) {
+        console.error('Rate limit exceeded for historical data.');
+      }
+    } else {
+      console.error('Error fetching historical data:', error);
     }
     
-    // Create a new request and store the promise
-    const requestPromise = axios.get('/api/crypto', {
-      params: {
-        endpoint: 'coin',
-        id: coinId,
-        days: days
-      },
-      timeout: 20000
-    })
-    .then(response => {
-      if (!response.data || !response.data.prices || !Array.isArray(response.data.prices)) {
-        console.error('Invalid historical data response:', response.data);
-        return getMockHistoryData(coinId, days);
-      }
-      
-      // Transform the data
-      const historyData = response.data.prices.map((priceData: [number, number]) => ({
-        timestamp: priceData[0],
-        price: priceData[1]
-      }));
-      
-      // Cache the data
-      historyCache[cacheKey] = {
-        data: historyData,
-        timestamp: now
-      };
-      
-      return historyData;
-    })
-    .finally(() => {
-      // Clear the pending request once it's completed
-      pendingRequests.coin = null;
-    });
-    
-    // Store the promise so concurrent calls can use it
-    pendingRequests.coin = requestPromise;
-    
-    return await requestPromise;
-  } catch (error) {
-    console.error('Error fetching historical data:', error);
-    return USE_MOCK_ON_FAILURE ? getMockHistoryData(coinId, days) : [];
+    return getMockHistoryData(coinId, days);
   }
 };
 

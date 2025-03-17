@@ -11,4 +11,9 @@ export interface CryptoCoin {
   sparkline_in_7d?: {
     price: number[];
   };
+}
+
+export interface PriceHistoryData {
+  timestamp: number;
+  price: number;
 } 

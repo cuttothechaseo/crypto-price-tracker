@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer Circle -->
+  <circle cx="24" cy="24" r="23" fill="#2F3542" stroke="#ffffff" stroke-width="2"/>
+  
+  <!-- Bitcoin Symbol -->
+  <path d="M31.5 17.5C30.6 15.4 28.4 14.4 26 14.2V11H23V14H21V11H18V14H13V17H16C16.8 17 17 17.2 17 18V30C17 30.8 16.8 31 16 31H13V34H18V37H21V34H23V37H26V34.2C29.6 33.8 32.5 31.8 32.5 28C32.5 25.6 31.3 23.8 29 23C30.6 22 32 20.2 31.5 17.5ZM20 18H26C27.6 18 28.5 19.2 28.5 20.5C28.5 21.8 27.6 23 26 23H20V18ZM27 30H20V25H27C28.8 25 29.5 26.2 29.5 27.5C29.5 28.8 28.8 30 27 30Z" fill="white"/>
+  
+  <!-- Circuit Lines -->
+  <path d="M35 15C32.5 12.5 29.5 11 24 11C18.5 11 15.5 12.5 13 15" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M35 33C32.5 35.5 29.5 37 24 37C18.5 37 15.5 35.5 13 33" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Dots -->
+  <circle cx="10.5" cy="24" r="1.5" fill="white"/>
+  <circle cx="37.5" cy="24" r="1.5" fill="white"/>
+  <circle cx="24" cy="7.5" r="1.5" fill="white"/>
+  <circle cx="24" cy="40.5" r="1.5" fill="white"/>
+</svg> 

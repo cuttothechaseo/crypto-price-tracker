@@ -11,21 +11,21 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-darkBackground border-b border-cyberPurple/30 shadow-glow-purple sticky top-0 z-10 backdrop-blur-sm">
+    <nav className="bg-white border-b border-gray-200 shadow-soft sticky top-0 z-10">
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center group">
-            <div className="relative w-8 h-8 mr-2 transition-all duration-300 group-hover:scale-110">
+            <div className="relative w-8 h-8 mr-2 transition-transform duration-200 group-hover:scale-105">
               <Image
                 src="/images/bitcoin-logo.svg"
                 alt="Bitcoin Logo"
                 width={32}
                 height={32}
-                className="w-full h-full object-contain animate-pulse-slow"
+                className="w-full h-full object-contain"
                 priority
               />
             </div>
-            <span className="font-bold text-xl font-['Orbitron'] text-transparent bg-clip-text bg-gradient-to-r from-cyberPurple to-electricBlue transition-all duration-300 group-hover:scale-105 group-hover:animate-glow">
+            <span className="font-bold text-xl text-darkGray transition-colors duration-200 group-hover:text-primaryBlue">
               Crypto Price Tracker
             </span>
           </div>
@@ -36,7 +36,7 @@ const Navbar: React.FC = () => {
               href="https://www.coingecko.com/en/api" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-electricBlue hover:text-white hover:shadow-glow-blue transition-all duration-300"
+              className="text-gray-600 hover:text-primaryBlue transition-colors duration-200"
             >
               API
             </a>
@@ -44,7 +44,7 @@ const Navbar: React.FC = () => {
               href="https://github.com" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-neonPink hover:text-white hover:shadow-glow-pink transition-all duration-300"
+              className="text-gray-600 hover:text-primaryBlue transition-colors duration-200"
             >
               GitHub
             </a>

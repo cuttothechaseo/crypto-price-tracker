@@ -15,12 +15,12 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto mb-10">
-      <div className={`relative transition-all duration-300 ${isFocused ? 'shadow-glow-blue' : ''}`}>
+    <div className="w-full max-w-md mx-auto mb-6">
+      <div className={`relative transition-all duration-200 ${isFocused ? 'shadow-soft' : ''}`}>
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <svg
-            className={`h-5 w-5 transition-colors duration-300 ${
-              isFocused ? 'text-electricBlue' : 'text-gray-500'
+            className={`h-5 w-5 transition-colors duration-200 ${
+              isFocused ? 'text-primaryBlue' : 'text-gray-400'
             }`}
             fill="none"
             viewBox="0 0 24 24"
@@ -36,7 +36,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
         </div>
         <input
           type="text"
-          className="block w-full pl-10 pr-3 py-3 border border-gray-700 rounded-md leading-5 bg-darkBackground placeholder-gray-500 text-electricBlue focus:outline-none focus:border-electricBlue font-['Exo_2'] transition-all duration-300"
+          className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-400 text-darkGray focus:outline-none focus:ring-2 focus:ring-primaryBlue/40 focus:border-primaryBlue transition-all duration-200"
           placeholder="Search cryptocurrencies..."
           value={searchTerm}
           onChange={handleChange}
@@ -52,7 +52,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
             }}
           >
             <svg
-              className="h-5 w-5 text-neonPink hover:text-white transition-colors duration-300"
+              className="h-5 w-5 text-gray-400 hover:text-danger transition-colors duration-200"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
@@ -64,14 +64,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
             </svg>
           </button>
         )}
-        
-        {/* Decorative elements */}
-        <div className={`absolute -bottom-0.5 left-0 h-0.5 bg-electricBlue transition-all duration-500 ${
-          isFocused ? 'w-full' : 'w-0'
-        }`}></div>
-        <div className={`absolute -right-0.5 top-0 w-0.5 bg-electricBlue transition-all duration-500 ${
-          isFocused ? 'h-full delay-100' : 'h-0'
-        }`}></div>
       </div>
     </div>
   );

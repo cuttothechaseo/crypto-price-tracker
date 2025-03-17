@@ -8,59 +8,44 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Cyberpunk theme colors
-        cyberPurple: "#6C00FF",
-        electricBlue: "#00F0FF",
-        neonPink: "#FF00A8",
-        darkBackground: "#0A0A0A",
-        neonGreen: "#39FF14",
-        cyberYellow: "#FFD700",
+        // Modern white & blue theme colors
+        primaryBlue: "#007BFF",
+        secondaryBlue: "#0056b3",
+        lightBlue: "#E6F3FF",
+        lightGray: "#F8F9FA",
+        mediumGray: "#E9ECEF",
+        darkGray: "#343A40",
+        subtleGray: "#F1F3F5",
         
-        // Updating primary colors to match cyberpunk theme
+        // Update primary colors to match blue theme
         primary: {
-          50: '#e0d9ff',
-          100: '#c6b5ff',
-          200: '#ac92ff',
-          300: '#916eff',
-          400: '#794bff',
-          500: '#6C00FF', // cyberPurple as primary
-          600: '#5f00df',
-          700: '#5200bf',
-          800: '#45009f',
-          900: '#38007f',
+          50: '#e6f3ff',
+          100: '#cce7ff',
+          200: '#99ceff',
+          300: '#66b5ff',
+          400: '#339cff',
+          500: '#007BFF', // primaryBlue as primary
+          600: '#0056b3', // secondaryBlue
+          700: '#004494',
+          800: '#003166',
+          900: '#001f3f',
         },
         
-        // Keep existing success and danger colors but enhance them
-        success: '#39FF14', // neonGreen
-        danger: '#FF00A8',  // neonPink
+        // Keep success and danger colors but make them more modern
+        success: '#28a745',
+        danger: '#dc3545',
       },
       boxShadow: {
-        // Custom glowing shadows
-        'glow-purple': '0 0 10px rgba(108, 0, 255, 0.7)',
-        'glow-blue': '0 0 10px rgba(0, 240, 255, 0.7)',
-        'glow-pink': '0 0 10px rgba(255, 0, 168, 0.7)',
-        'glow-green': '0 0 10px rgba(57, 255, 20, 0.7)',
+        'soft': '0 2px 8px rgba(0, 0, 0, 0.05)',
+        'card': '0 4px 6px rgba(0, 0, 0, 0.04)',
+        'hover': '0 10px 15px rgba(0, 0, 0, 0.03)',
+        'button': '0 4px 6px rgba(0, 123, 255, 0.25)',
       },
       animation: {
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
-        'glitch': 'glitch 1s infinite',
-      },
-      keyframes: {
-        glow: {
-          '0%': { textShadow: '0 0 5px rgba(108, 0, 255, 0.7)' },
-          '100%': { textShadow: '0 0 15px rgba(108, 0, 255, 0.9), 0 0 20px rgba(0, 240, 255, 0.4)' },
-        },
-        glitch: {
-          '0%, 100%': { transform: 'translate(0)' },
-          '10%': { transform: 'translate(-1px, 1px)' },
-          '20%': { transform: 'translate(0px, 1px)' },
-          '30%': { transform: 'translate(1px, -1px)' },
-          '40%': { transform: 'translate(-1px, 0)' },
-        },
+        'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       backgroundImage: {
-        'cyber-grid': "url('/images/cyber-grid.svg')",
+        'gradient-blue': 'linear-gradient(135deg, #007BFF, #0056b3)',
       },
     },
   },

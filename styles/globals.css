@@ -2,27 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import cyberpunk fonts */
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800&display=swap');
+/* Import fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
 
 @layer base {
   body {
-    @apply bg-darkBackground text-gray-300;
-    background-image: 
-      radial-gradient(circle at 25% 25%, rgba(108, 0, 255, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, rgba(0, 240, 255, 0.1) 0%, transparent 50%),
-      linear-gradient(rgba(10, 10, 10, 0.95), rgba(10, 10, 10, 0.95)),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-opacity='0.05'%3E%3Cpath d='M0 0h100v1H0zM0 99h100v1H0z'/%3E%3Cpath d='M0 0v100h1V0zM99 0v100h1V0z'/%3E%3Cpath d='M10 10h80v80H10z'/%3E%3Cpath d='M20 20h60v60H20z'/%3E%3Cpath d='M30 30h40v40H30z'/%3E%3Cpath d='M40 40h20v20H40z'/%3E%3C/g%3E%3C/svg%3E");
+    @apply bg-lightGray text-darkGray;
+    font-family: 'Inter', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-["Orbitron",_sans-serif];
-    letter-spacing: 0.05em;
-  }
-  
-  p, span, div {
-    @apply font-["Exo_2",_sans-serif];
+    @apply font-['DM_Sans',_sans-serif] font-medium;
   }
   
   /* Custom scrollbar */
@@ -31,113 +22,56 @@
   }
   
   ::-webkit-scrollbar-track {
-    @apply bg-darkBackground;
+    @apply bg-lightGray;
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply bg-cyberPurple;
+    @apply bg-gray-300 hover:bg-gray-400;
     border-radius: 4px;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-neonPink;
   }
 
   /* Selection color */
   ::selection {
-    @apply bg-neonPink text-white;
+    @apply bg-primaryBlue text-white;
   }
 }
 
 @layer components {
   .card {
-    @apply bg-darkBackground rounded-lg border border-gray-800 shadow-md 
-      hover:shadow-glow-purple hover:border-cyberPurple hover:scale-[1.02] 
-      transition-all duration-300;
-    background: linear-gradient(135deg, rgba(20, 20, 25, 0.9), rgba(10, 10, 10, 0.95));
+    @apply bg-white rounded-lg border border-gray-200 shadow-card 
+      hover:shadow-hover hover:border-primaryBlue/20 hover:scale-[1.01]
+      transition-all duration-200;
   }
   
   .btn {
-    @apply px-4 py-2 rounded-md font-medium transition-all duration-300 font-["Orbitron",_sans-serif];
+    @apply px-4 py-2 rounded-md font-medium transition-all duration-200;
   }
   
   .btn-primary {
-    @apply bg-cyberPurple text-white hover:bg-opacity-80 hover:shadow-glow-purple;
+    @apply bg-primaryBlue text-white hover:bg-secondaryBlue;
   }
   
   .btn-secondary {
-    @apply bg-electricBlue bg-opacity-20 text-electricBlue border border-electricBlue
-      hover:bg-opacity-30 hover:shadow-glow-blue;
+    @apply bg-white border border-primaryBlue text-primaryBlue
+      hover:bg-lightBlue;
   }
   
-  .neon-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-cyberPurple to-electricBlue;
-    text-shadow: 0 0 5px rgba(108, 0, 255, 0.3), 0 0 10px rgba(0, 240, 255, 0.2);
+  .text-gradient {
+    @apply text-transparent bg-clip-text bg-gradient-blue;
   }
   
-  .cyber-border {
-    @apply border border-cyberPurple shadow-glow-purple;
+  /* Input styles */
+  .input-field {
+    @apply border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primaryBlue/50 focus:border-primaryBlue transition-all duration-200;
   }
   
-  .glitch-effect {
-    @apply relative;
+  /* Card hover effect */
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-[1.02];
   }
   
-  .glitch-effect::before,
-  .glitch-effect::after {
-    @apply content-[''] absolute top-0 left-0 w-full h-full;
-    clip: rect(44px, 450px, 56px, 0);
-  }
-  
-  .glitch-effect::before {
-    @apply text-electricBlue;
-    left: 2px;
-    text-shadow: -1px 0 #ff00a8;
-    animation: glitch-anim 2s infinite linear alternate-reverse;
-  }
-  
-  .glitch-effect::after {
-    @apply text-neonPink;
-    left: -2px;
-    text-shadow: 1px 0 #00f0ff;
-    animation: glitch-anim 3s infinite linear alternate-reverse;
-  }
-  
-  /* Pulsing animation for buttons */
-  .pulse-btn {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-  
-  /* Grid background */
-  .cyber-grid-bg {
-    @apply relative;
-  }
-  
-  .cyber-grid-bg::before {
-    @apply content-[''] absolute top-0 left-0 w-full h-full -z-10 opacity-5;
-    background-image: linear-gradient(to right, #6C00FF 1px, transparent 1px),
-                      linear-gradient(to bottom, #6C00FF 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-}
-
-@keyframes glitch-anim {
-  0% {
-    clip: rect(10px, 9999px, 20px, 0);
-  }
-  20% {
-    clip: rect(30px, 9999px, 15px, 0);
-  }
-  40% {
-    clip: rect(25px, 9999px, 40px, 0);
-  }
-  60% {
-    clip: rect(5px, 9999px, 30px, 0);
-  }
-  80% {
-    clip: rect(40px, 9999px, 5px, 0);
-  }
-  100% {
-    clip: rect(15px, 9999px, 35px, 0);
+  /* Table styles */
+  .table-row {
+    @apply border-b border-gray-200 hover:bg-lightBlue transition-colors duration-150;
   }
 } 

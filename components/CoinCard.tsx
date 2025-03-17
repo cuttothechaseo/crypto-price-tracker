@@ -1,166 +1,177 @@
 import React, { useState } from 'react';
-import { CryptoData } from '../utils/fetchCrypto';
-import CryptoChart from './CryptoChart';
+import Image from 'next/image';
+import { CryptoCoin } from '../types';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 interface CoinCardProps {
-  coin: CryptoData;
+  coin: CryptoCoin;
 }
 
 const CoinCard: React.FC<CoinCardProps> = ({ coin }) => {
   const [showChart, setShowChart] = useState(false);
 
-  const toggleChart = () => {
-    setShowChart(!showChart);
+  const formatPrice = (price: number) => {
+    if (price < 0.01) return '$' + price.toFixed(6);
+    if (price < 1) return '$' + price.toFixed(4);
+    if (price < 10) return '$' + price.toFixed(2);
+    if (price < 1000) return '$' + price.toFixed(2);
+    return '$' + price.toLocaleString('en-US', { maximumFractionDigits: 2 });
   };
 
-  // Define color based on price change direction
-  const priceChangeColor = typeof coin.price_change_percentage_24h === 'number' && !isNaN(coin.price_change_percentage_24h)
-    ? coin.price_change_percentage_24h >= 0 ? 'neonGreen' : 'neonPink'
-    : 'gray-400';
+  const formatMarketCap = (marketCap: number) => {
+    if (marketCap >= 1e12) return '$' + (marketCap / 1e12).toFixed(2) + 'T';
+    if (marketCap >= 1e9) return '$' + (marketCap / 1e9).toFixed(2) + 'B';
+    if (marketCap >= 1e6) return '$' + (marketCap / 1e6).toFixed(2) + 'M';
+    return '$' + marketCap.toLocaleString();
+  };
+
+  const getChangeColor = (change: number) => {
+    return change >= 0 ? 'text-green-600' : 'text-danger';
+  };
+
+  const getChangeIcon = (change: number) => {
+    return change >= 0 ? (
+      <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+        <path fillRule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clipRule="evenodd"></path>
+      </svg>
+    ) : (
+      <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+        <path fillRule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
+      </svg>
+    );
+  };
+
+  // Chart configuration
+  const chartData = coin.sparkline_in_7d?.price || [];
+  const labels = Array.from({ length: chartData.length }, (_, i) => i);
+  
+  const data = {
+    labels,
+    datasets: [
+      {
+        data: chartData,
+        borderColor: coin.price_change_percentage_7d_in_currency 
+          ? (coin.price_change_percentage_7d_in_currency >= 0 ? 'rgba(22, 163, 74, 0.8)' : 'rgba(220, 38, 38, 0.8)') 
+          : 'rgba(59, 130, 246, 0.8)',
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        pointRadius: 0,
+        tension: 0.4,
+      },
+    ],
+  };
+  
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        enabled: true,
+        mode: 'index' as const,
+        intersect: false,
+      },
+    },
+    scales: {
+      x: {
+        display: false,
+      },
+      y: {
+        display: false,
+      },
+    },
+    interaction: {
+      mode: 'index' as const,
+      intersect: false,
+    },
+  };
 
   return (
-    <div className="card p-6 flex flex-col items-center transition-all duration-300 hover:shadow-lg rounded-xl relative overflow-hidden group">
-      {/* Background glow effect that appears on hover */}
-      <div className="absolute inset-0 bg-gradient-to-br from-cyberPurple/5 to-electricBlue/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      
-      <div className="flex items-center mb-4 w-full relative z-10">
-        <div className="w-12 h-12 mr-3 relative flex-shrink-0 rounded-full overflow-hidden border border-gray-700 group-hover:border-electricBlue transition-colors duration-300">
-          <img 
-            src={coin.image} 
-            alt={coin.name} 
-            width={48}
-            height={48}
-            className="w-full h-full object-contain bg-darkBackground p-1"
-            onError={(e) => {
-              // Fallback if image fails to load
-              const target = e.target as HTMLImageElement;
-              target.onerror = null;
-              target.src = `https://via.placeholder.com/48/CCCCCC/808080?text=${coin.symbol}`;
-            }}
-          />
-        </div>
-        <div className="flex flex-col items-start">
-          <h2 className="text-xl font-bold text-electricBlue group-hover:animate-glow transition-all duration-300">{coin.name}</h2>
-          <span className="text-sm text-gray-400 font-medium">{coin.symbol}</span>
-        </div>
-      </div>
-      
-      <div className="w-full border-t border-gray-700 group-hover:border-cyberPurple/50 my-3 transition-colors duration-300"></div>
-      
-      <div className="w-full flex justify-between items-center my-2 relative z-10">
-        <span className="text-gray-400 font-medium">Price:</span>
-        <span className="text-xl font-bold text-white group-hover:text-electricBlue transition-colors duration-300">
-          {typeof coin.current_price === 'number' && !isNaN(coin.current_price) ? (
-            `$${coin.current_price.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            })}`
-          ) : (
-            'Price unavailable'
-          )}
-        </span>
-      </div>
-      
-      <div className="w-full flex justify-between items-center my-2 relative z-10">
-        <span className="text-gray-400 font-medium">24h Change:</span>
-        <div className="flex items-center">
-          {typeof coin.price_change_percentage_24h === 'number' && !isNaN(coin.price_change_percentage_24h) ? (
-            <div className={`flex items-center font-semibold ${
-              coin.price_change_percentage_24h >= 0 
-                ? 'text-neonGreen' 
-                : 'text-neonPink'
-            } transition-all duration-300 ${
-              coin.price_change_percentage_24h >= 0 
-                ? 'group-hover:shadow-glow-green' 
-                : 'group-hover:shadow-glow-pink'
-            }`}>
-              <span className="mr-1">
-                {coin.price_change_percentage_24h >= 0 ? '↑' : '↓'}
-              </span>
-              <span>
-                {Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
-              </span>
+    <div className="bg-white rounded-lg shadow-soft border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-md hover:translate-y-[-2px]">
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0 bg-gray-100 rounded-full p-1.5">
+              <Image
+                src={coin.image}
+                alt={coin.name}
+                width={32}
+                height={32}
+                className="rounded-full"
+              />
             </div>
-          ) : (
-            <span className="text-gray-500">Data unavailable</span>
-          )}
+            <div>
+              <h3 className="font-medium text-darkGray">{coin.name}</h3>
+              <span className="text-gray-500 text-sm uppercase">{coin.symbol}</span>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-darkGray font-medium">{formatPrice(coin.current_price)}</div>
+            <div className={`flex items-center text-sm ${getChangeColor(coin.price_change_percentage_24h)}`}>
+              {getChangeIcon(coin.price_change_percentage_24h)}
+              {Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
+            </div>
+          </div>
         </div>
-      </div>
-      
-      <div className="w-full flex justify-between items-center my-2 relative z-10">
-        <span className="text-gray-400 font-medium">Market Cap:</span>
-        <span className="font-semibold text-white group-hover:text-cyberPurple transition-colors duration-300">
-          {typeof coin.market_cap === 'number' && !isNaN(coin.market_cap) ? (
-            `$${formatMarketCap(coin.market_cap)}`
-          ) : (
-            'Data unavailable'
-          )}
-        </span>
-      </div>
-      
-      <div className="w-full flex space-x-2 mt-4 relative z-10">
-        <button 
-          className="flex-1 py-2 px-4 bg-cyberPurple text-white rounded-lg transition-all duration-300 font-medium hover:shadow-glow-purple pulse-btn"
-          onClick={() => window.open(`https://www.coingecko.com/en/coins/${coin.id}`, '_blank')}
-        >
-          View Details
-        </button>
         
-        <button
-          className={`py-2 px-3 rounded-lg transition-all duration-300 font-medium flex items-center justify-center ${
-            showChart 
-              ? 'bg-electricBlue/20 border border-electricBlue text-electricBlue hover:shadow-glow-blue' 
-              : 'bg-gray-800 text-gray-300 hover:text-electricBlue hover:border-electricBlue border border-gray-700'
-          }`}
-          onClick={toggleChart}
-          aria-label={showChart ? 'Hide price chart' : 'Show price chart'}
-          title={showChart ? 'Hide price chart' : 'Show price chart'}
-        >
-          {showChart ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-            </svg>
-          )}
-        </button>
+        <div className="grid grid-cols-2 gap-3 mb-3 text-sm">
+          <div>
+            <span className="text-gray-500">Rank</span>
+            <div className="text-darkGray font-medium">#{coin.market_cap_rank}</div>
+          </div>
+          <div>
+            <span className="text-gray-500">Market Cap</span>
+            <div className="text-darkGray font-medium">{formatMarketCap(coin.market_cap)}</div>
+          </div>
+        </div>
+
+        {showChart && (
+          <div className="mt-3 h-40">
+            <Line data={data} options={options} />
+          </div>
+        )}
       </div>
       
-      {/* Collapsible chart section */}
-      {showChart && (
-        <CryptoChart 
-          coinId={coin.id} 
-          coinName={coin.name} 
-          coinSymbol={coin.symbol}
-          color={coin.price_change_percentage_24h >= 0 ? '#39FF14' : '#FF00A8'}
-        />
-      )}
+      <button
+        onClick={() => setShowChart(!showChart)}
+        className="w-full bg-gray-50 border-t border-gray-200 py-2 text-sm text-primaryBlue hover:bg-gray-100 transition-colors duration-200 flex justify-center items-center"
+      >
+        {showChart ? 'Hide Chart' : 'Show Chart'}
+        <svg
+          className={`w-4 h-4 ml-1 transition-transform duration-200 ${showChart ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
     </div>
   );
 };
-
-// Helper function to format large market cap numbers
-function formatMarketCap(marketCap: number): string {
-  // Handle edge cases
-  if (marketCap === 0) return '0.00';
-  if (!marketCap || isNaN(marketCap)) return 'N/A';
-  
-  if (marketCap >= 1e12) {
-    return (marketCap / 1e12).toFixed(2) + 'T';
-  } else if (marketCap >= 1e9) {
-    return (marketCap / 1e9).toFixed(2) + 'B';
-  } else if (marketCap >= 1e6) {
-    return (marketCap / 1e6).toFixed(2) + 'M';
-  } else if (marketCap >= 1e3) {
-    return (marketCap / 1e3).toFixed(2) + 'K';
-  } else {
-    return marketCap.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  }
-}
 
 export default CoinCard; 

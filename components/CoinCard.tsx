@@ -42,35 +42,47 @@ const CoinCard: React.FC<CoinCardProps> = ({ coin }) => {
       <div className="w-full flex justify-between items-center my-2">
         <span className="text-gray-600 dark:text-gray-400 font-medium">Price:</span>
         <span className="text-xl font-bold text-gray-800 dark:text-white">
-          ${coin.current_price.toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-          })}
+          {typeof coin.current_price === 'number' && !isNaN(coin.current_price) ? (
+            `$${coin.current_price.toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}`
+          ) : (
+            'Price unavailable'
+          )}
         </span>
       </div>
       
       <div className="w-full flex justify-between items-center my-2">
         <span className="text-gray-600 dark:text-gray-400 font-medium">24h Change:</span>
         <div className="flex items-center">
-          <div className={`flex items-center font-semibold ${
-            coin.price_change_percentage_24h >= 0 
-              ? 'text-green-500 dark:text-green-400' 
-              : 'text-red-500 dark:text-red-400'
-          }`}>
-            <span className="mr-1">
-              {coin.price_change_percentage_24h >= 0 ? '↑' : '↓'}
-            </span>
-            <span>
-              {Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
-            </span>
-          </div>
+          {typeof coin.price_change_percentage_24h === 'number' && !isNaN(coin.price_change_percentage_24h) ? (
+            <div className={`flex items-center font-semibold ${
+              coin.price_change_percentage_24h >= 0 
+                ? 'text-green-500 dark:text-green-400' 
+                : 'text-red-500 dark:text-red-400'
+            }`}>
+              <span className="mr-1">
+                {coin.price_change_percentage_24h >= 0 ? '↑' : '↓'}
+              </span>
+              <span>
+                {Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
+              </span>
+            </div>
+          ) : (
+            <span className="text-gray-500">Data unavailable</span>
+          )}
         </div>
       </div>
       
       <div className="w-full flex justify-between items-center my-2">
         <span className="text-gray-600 dark:text-gray-400 font-medium">Market Cap:</span>
         <span className="font-semibold text-gray-800 dark:text-white">
-          ${formatMarketCap(coin.market_cap)}
+          {typeof coin.market_cap === 'number' && !isNaN(coin.market_cap) ? (
+            `$${formatMarketCap(coin.market_cap)}`
+          ) : (
+            'Data unavailable'
+          )}
         </span>
       </div>
       
@@ -119,12 +131,18 @@ const CoinCard: React.FC<CoinCardProps> = ({ coin }) => {
 
 // Helper function to format large market cap numbers
 function formatMarketCap(marketCap: number): string {
+  // Handle edge cases
+  if (marketCap === 0) return '0.00';
+  if (!marketCap || isNaN(marketCap)) return 'N/A';
+  
   if (marketCap >= 1e12) {
     return (marketCap / 1e12).toFixed(2) + 'T';
   } else if (marketCap >= 1e9) {
     return (marketCap / 1e9).toFixed(2) + 'B';
   } else if (marketCap >= 1e6) {
     return (marketCap / 1e6).toFixed(2) + 'M';
+  } else if (marketCap >= 1e3) {
+    return (marketCap / 1e3).toFixed(2) + 'K';
   } else {
     return marketCap.toLocaleString("en-US", {
       minimumFractionDigits: 2,

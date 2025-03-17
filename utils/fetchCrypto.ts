@@ -20,8 +20,22 @@ export interface PriceHistoryData {
 // Flag to control whether to use mock data when API fails
 const USE_MOCK_ON_FAILURE = true;
 
+// Track API request timestamps to avoid rate limiting
+let lastApiRequest = 0;
+const MIN_REQUEST_INTERVAL = 10000; // 10 seconds between requests
+
 export const fetchCryptoData = async (): Promise<CryptoData[]> => {
   try {
+    // Check if we're making requests too frequently
+    const now = Date.now();
+    if (now - lastApiRequest < MIN_REQUEST_INTERVAL) {
+      console.warn('API requests too frequent, using cached or mock data');
+      return USE_MOCK_ON_FAILURE ? mockCryptoData : [];
+    }
+    
+    lastApiRequest = now;
+    console.log('Fetching cryptocurrency data from CoinGecko API...');
+    
     const response = await axios.get(
       'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false',
       {
@@ -33,21 +47,39 @@ export const fetchCryptoData = async (): Promise<CryptoData[]> => {
       }
     );
 
+    console.log("Fetched Crypto Data:", response.data);
+
     if (!response.data || !Array.isArray(response.data)) {
       console.error('Invalid response format:', response.data);
       return USE_MOCK_ON_FAILURE ? mockCryptoData : [];
     }
 
     // Clean up and transform the data
-    const cryptoData = response.data.map((coin: any) => ({
-      id: coin.id,
-      name: coin.name,
-      symbol: coin.symbol.toUpperCase(),
-      image: coin.image,
-      current_price: coin.current_price,
-      price_change_percentage_24h: coin.price_change_percentage_24h || 0,
-      market_cap: coin.market_cap
-    }));
+    const cryptoData = response.data.map((coin: any) => {
+      // Ensure all required fields exist and are of the correct type
+      const processedCoin = {
+        id: coin.id || `unknown-${Math.random().toString(36).substring(7)}`,
+        name: coin.name || 'Unknown Coin',
+        symbol: (coin.symbol || 'UNK').toUpperCase(),
+        image: coin.image || `https://via.placeholder.com/64?text=${coin.symbol || 'UNK'}`,
+        current_price: typeof coin.current_price === 'number' ? coin.current_price : 0,
+        price_change_percentage_24h: typeof coin.price_change_percentage_24h === 'number' ? coin.price_change_percentage_24h : 0,
+        market_cap: typeof coin.market_cap === 'number' ? coin.market_cap : 0
+      };
+      
+      return processedCoin;
+    });
+
+    console.log("Transformed Crypto Data:", cryptoData);
+    // Verify that current_price values are valid numbers
+    const hasInvalidPrices = cryptoData.some(coin => 
+      typeof coin.current_price !== 'number' || 
+      isNaN(coin.current_price)
+    );
+    
+    if (hasInvalidPrices) {
+      console.error('Found invalid price values in API response');
+    }
 
     return cryptoData;
   } catch (error) {
@@ -62,6 +94,12 @@ export const fetchCryptoData = async (): Promise<CryptoData[]> => {
       if (error.response?.status === 429) {
         console.error('Rate limit exceeded. Using mock data instead.');
         return mockCryptoData;
+      }
+      
+      // Handle timeout errors more specifically
+      if (error.code === 'ECONNABORTED') {
+        console.error('API request timed out. Using mock data instead.');
+        return USE_MOCK_ON_FAILURE ? mockCryptoData : [];
       }
     } else {
       console.error('Error fetching crypto data:', error);

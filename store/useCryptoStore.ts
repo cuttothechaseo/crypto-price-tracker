@@ -28,6 +28,25 @@ export const useCryptoStore = create<CryptoStore>((set, get) => ({
     try {
       set({ loading: true, error: null });
       const data = await fetchCryptoData();
+      console.log("Updated Crypto List:", data);
+      
+      // Verify data integrity before setting state
+      if (data && Array.isArray(data) && data.length > 0) {
+        // Check if all required properties exist and are valid
+        const allValid = data.every(coin => 
+          typeof coin.current_price === 'number' && 
+          !isNaN(coin.current_price) &&
+          typeof coin.market_cap === 'number' && 
+          !isNaN(coin.market_cap)
+        );
+        
+        if (!allValid) {
+          console.error('Some coins have invalid data:', data);
+        }
+      } else {
+        console.warn('Empty or invalid data returned from API');
+      }
+      
       set({ cryptoList: data, loading: false });
     } catch (error) {
       console.error('Error in store while fetching crypto data:', error);

@@ -1,33 +1,29 @@
 import { PriceHistoryData } from './fetchCrypto';
 
-// Function to generate mock price history data for a specific coin
+// Helper function to generate synthetic price history data
 export function generateMockHistoryForCoin(
   basePrice: number, 
-  volatility: number = 0.05, 
-  trending: number = 0, 
+  volatility: number, 
+  trend: number, 
   days: number = 7
 ): PriceHistoryData[] {
   const data: PriceHistoryData[] = [];
   const now = Date.now();
-  const millisecondsPerDay = 24 * 60 * 60 * 1000;
-  
-  // Create data points every 4 hours
-  const pointsPerDay = 6;
-  const totalPoints = days * pointsPerDay;
+  const intervals = days * 24; // One data point per hour
   
   let currentPrice = basePrice;
   
-  for (let i = 0; i < totalPoints; i++) {
-    // Move backward in time from now
-    const timestamp = now - (totalPoints - i) * (millisecondsPerDay / pointsPerDay);
+  for (let i = intervals; i >= 0; i--) {
+    // Calculate timestamp for this data point
+    const timestamp = now - (i * 3600 * 1000); // hour intervals
     
-    // Add some random price movement
-    const randomChange = (Math.random() - 0.5) * 2 * volatility;
-    // Add trend direction (positive or negative trend)
-    const trendChange = trending * (i / totalPoints);
+    // Add some random movement with a general trend
+    const randomChange = (Math.random() - 0.5) * volatility * currentPrice;
+    const trendChange = (trend / intervals) * currentPrice;
+    currentPrice = currentPrice + randomChange + trendChange;
     
-    // Calculate new price with randomness and trend
-    currentPrice = currentPrice * (1 + randomChange + trendChange);
+    // Ensure price doesn't go negative
+    if (currentPrice < 0.01) currentPrice = 0.01;
     
     data.push({
       timestamp,
@@ -38,16 +34,16 @@ export function generateMockHistoryForCoin(
   return data;
 }
 
-// Pre-generate some historical data for common coins
-export const mockBitcoinHistory = generateMockHistoryForCoin(50000, 0.03, 0.05, 7);
-export const mockEthereumHistory = generateMockHistoryForCoin(3000, 0.04, 0.03, 7);
-export const mockBinanceCoinHistory = generateMockHistoryForCoin(600, 0.05, -0.01, 7);
-export const mockSolanaHistory = generateMockHistoryForCoin(120, 0.06, 0.07, 7);
-
-// Map of coin IDs to their mock historical data
+// Generate mock history data for the top 10 cryptocurrencies
 export const mockHistoryMap: Record<string, PriceHistoryData[]> = {
-  'bitcoin': mockBitcoinHistory,
-  'ethereum': mockEthereumHistory,
-  'binancecoin': mockBinanceCoinHistory,
-  'solana': mockSolanaHistory
+  'bitcoin': generateMockHistoryForCoin(61245.78, 0.02, 0.05),
+  'ethereum': generateMockHistoryForCoin(3345.67, 0.03, 0.03),
+  'binancecoin': generateMockHistoryForCoin(567.89, 0.025, -0.02),
+  'solana': generateMockHistoryForCoin(123.45, 0.04, 0.12),
+  'ripple': generateMockHistoryForCoin(0.567, 0.05, -0.03),
+  'cardano': generateMockHistoryForCoin(0.45, 0.03, 0.02),
+  'polkadot': generateMockHistoryForCoin(6.78, 0.04, 0.08),
+  'dogecoin': generateMockHistoryForCoin(0.123, 0.06, 0.25),
+  'avalanche-2': generateMockHistoryForCoin(34.56, 0.035, -0.04),
+  'chainlink': generateMockHistoryForCoin(13.57, 0.03, 0.04)
 }; 

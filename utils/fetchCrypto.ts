@@ -38,27 +38,13 @@ export async function fetchCryptoData(): Promise<CryptoCoin[]> {
     lastApiRequest = Date.now();
     console.log('Fetching cryptocurrency data from CoinGecko API...');
     
-    const response = await axios.get(
-      'https://api.coingecko.com/api/v3/coins/markets',
-      {
-        params: {
-          vs_currency: 'usd',
-          order: 'market_cap_desc',
-          per_page: 100,
-          page: 1,
-          sparkline: true,
-          price_change_percentage: '7d',
-        },
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        timeout: 15000 // 15 second timeout
-      }
-    );
+    // Use our proxy API route instead of direct CoinGecko API call
+    const response = await axios.get('/api/crypto?endpoint=markets', {
+      timeout: 15000 // 15 second timeout
+    });
     
     if (!response.data || !Array.isArray(response.data)) {
-      console.error('Invalid response format from CoinGecko API');
+      console.error('Invalid response format from API');
       throw new Error('Invalid response format');
     }
     
@@ -81,11 +67,8 @@ export async function fetchGlobalMarketData() {
     
     lastApiRequest = Date.now();
     
-    const response = await axios.get('https://api.coingecko.com/api/v3/global', {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
+    // Use our proxy API route
+    const response = await axios.get('/api/crypto?endpoint=global', {
       timeout: 15000
     });
     
@@ -113,12 +96,8 @@ export async function fetchTrendingCoins(): Promise<CryptoCoin[]> {
     
     lastApiRequest = Date.now();
     
-    // First get the trending coin ids
-    const trendingResponse = await axios.get('https://api.coingecko.com/api/v3/search/trending', {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
+    // First get the trending coin ids using our proxy
+    const trendingResponse = await axios.get('/api/crypto?endpoint=trending', {
       timeout: 15000
     });
     
@@ -140,22 +119,15 @@ export async function fetchTrendingCoins(): Promise<CryptoCoin[]> {
     await new Promise(resolve => setTimeout(resolve, 1000));
     lastApiRequest = Date.now();
     
-    // Then fetch detailed data for those coins
+    // Then fetch detailed data for those coins using our proxy
     const idsParam = coinIds.join(',');
-    const detailedResponse = await axios.get(
-      'https://api.coingecko.com/api/v3/coins/markets',
-      {
-        params: {
-          vs_currency: 'usd',
-          ids: idsParam,
-        },
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        timeout: 15000
-      }
-    );
+    const detailedResponse = await axios.get('/api/crypto', {
+      params: {
+        endpoint: 'markets',
+        ids: idsParam,
+      },
+      timeout: 15000
+    });
     
     if (!detailedResponse.data || !Array.isArray(detailedResponse.data)) {
       console.error('Invalid coin details response format');
@@ -194,17 +166,15 @@ export const fetchCryptoHistory = async (coinId: string, days: number = 7): Prom
       return cachedData.data;
     }
     
-    // If no cached data or cache is stale, fetch from API
-    const response = await axios.get(
-      `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`,
-      {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        timeout: 10000
-      }
-    );
+    // If no cached data or cache is stale, fetch from our proxy API
+    const response = await axios.get('/api/crypto', {
+      params: {
+        endpoint: 'coin',
+        id: coinId,
+        days: days
+      },
+      timeout: 10000
+    });
 
     if (!response.data || !response.data.prices || !Array.isArray(response.data.prices)) {
       console.error('Invalid historical data response:', response.data);
@@ -225,21 +195,7 @@ export const fetchCryptoHistory = async (coinId: string, days: number = 7): Prom
 
     return historyData;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Axios error fetching historical data:', {
-        coinId,
-        message: error.message,
-        status: error.response?.status
-      });
-      
-      // Handle rate limiting
-      if (error.response?.status === 429) {
-        console.error('Rate limit exceeded for historical data.');
-      }
-    } else {
-      console.error('Error fetching historical data:', error);
-    }
-    
+    console.error('Error fetching historical data:', error);
     return USE_MOCK_ON_FAILURE ? getMockHistoryData(coinId, days) : [];
   }
 };

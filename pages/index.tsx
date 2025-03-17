@@ -8,7 +8,7 @@ import SearchBar from '../components/SearchBar';
 import { CryptoData } from '../utils/fetchCrypto';
 
 const Home: NextPage = () => {
-  const { cryptoList, loading, error, fetchData, getSortedCryptoList } = useCryptoStore();
+  const { cryptoList, loading, error, fetchData, getSortedCryptoList, sortOrder } = useCryptoStore();
   const [isClient, setIsClient] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -30,8 +30,9 @@ const Home: NextPage = () => {
 
   // Get sorted list
   const sortedCryptoList = useMemo(() => {
+    console.log('Recalculating sorted list with sort order:', sortOrder);
     return getSortedCryptoList();
-  }, [getSortedCryptoList, cryptoList]);
+  }, [getSortedCryptoList, cryptoList, sortOrder]);
 
   // Filter cryptoList based on searchTerm
   const filteredCryptoList = useMemo(() => {

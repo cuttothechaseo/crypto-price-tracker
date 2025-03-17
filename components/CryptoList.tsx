@@ -2,12 +2,15 @@ import React from 'react';
 import { CryptoData } from '../utils/fetchCrypto';
 import CoinCard from './CoinCard';
 import SortDropdown from './SortDropdown';
+import { useCryptoStore } from '../store/useCryptoStore';
 
 interface CryptoListProps {
   cryptoData: CryptoData[];
 }
 
 const CryptoList: React.FC<CryptoListProps> = ({ cryptoData }) => {
+  const { sortOrder } = useCryptoStore();
+  
   if (!cryptoData || cryptoData.length === 0) {
     return (
       <div className="text-center py-10">

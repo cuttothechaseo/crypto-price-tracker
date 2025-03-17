@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { SortOrder, useCryptoStore } from '../store/useCryptoStore';
 
 const SortDropdown: React.FC = () => {
   const { sortOrder, setSortOrder } = useCryptoStore();
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value as SortOrder;
+    console.log('Sort dropdown changed to:', value);
     setSortOrder(value);
-  };
+  }, [setSortOrder]);
 
   return (
     <div className="flex items-center space-x-2 mb-6">

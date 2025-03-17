@@ -20,6 +20,7 @@ export const useCryptoStore = create<CryptoStore>((set, get) => ({
   sortOrder: 'market_cap_desc' as SortOrder,
   
   setSortOrder: (order) => {
+    console.log('Setting sort order to:', order);
     set({ sortOrder: order });
   },
   
@@ -39,6 +40,7 @@ export const useCryptoStore = create<CryptoStore>((set, get) => ({
   
   getSortedCryptoList: () => {
     const { cryptoList, sortOrder } = get();
+    console.log('Getting sorted list with sort order:', sortOrder);
     let sortedList = [...cryptoList];
     
     switch (sortOrder) {

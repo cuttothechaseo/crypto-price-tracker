@@ -5,7 +5,9 @@ import { format } from 'date-fns';
 import Navbar from '../components/Navbar';
 import SearchBar from '../components/SearchBar';
 import CryptoList from '../components/CryptoList';
+import MarketOverview from '../components/MarketOverview';
 import { CryptoCoin } from '../types';
+import { fetchCryptoData, fetchGlobalMarketData, fetchTrendingCoins, getTopGainers } from '../utils/fetchCrypto';
 
 export default function Home() {
   const [coins, setCoins] = useState<CryptoCoin[]>([]);
@@ -14,40 +16,59 @@ export default function Home() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   
-  const fetchCryptoData = async () => {
+  // Market overview data
+  const [globalMarketCap, setGlobalMarketCap] = useState<number>(0);
+  const [globalMarketCapChange, setGlobalMarketCapChange] = useState<number>(0);
+  const [volume24h, setVolume24h] = useState<number>(0);
+  const [volumeChange, setVolumeChange] = useState<number>(0);
+  const [trendingCoins, setTrendingCoins] = useState<CryptoCoin[]>([]);
+  const [topGainers, setTopGainers] = useState<CryptoCoin[]>([]);
+  
+  const fetchAllData = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await axios.get(
-        'https://api.coingecko.com/api/v3/coins/markets',
-        {
-          params: {
-            vs_currency: 'usd',
-            order: 'market_cap_desc',
-            per_page: 100,
-            page: 1,
-            sparkline: true,
-            price_change_percentage: '7d',
-          },
-        }
-      );
+      // Fetch all data in parallel
+      const [cryptoData, globalData, trendingData] = await Promise.all([
+        fetchCryptoData(),
+        fetchGlobalMarketData(),
+        fetchTrendingCoins(),
+      ]);
       
-      setCoins(response.data);
+      // Set crypto data
+      setCoins(cryptoData);
+      
+      // Set global market data
+      if (globalData) {
+        setGlobalMarketCap(globalData.total_market_cap.usd);
+        setGlobalMarketCapChange(globalData.market_cap_change_percentage_24h_usd);
+        setVolume24h(globalData.total_volume.usd);
+        // Calculate approximate volume change (not directly provided by API)
+        setVolumeChange(globalData.market_cap_change_percentage_24h_usd * 0.8); // Rough estimate
+      }
+      
+      // Set trending coins
+      setTrendingCoins(trendingData);
+      
+      // Calculate top gainers from crypto data
+      const topGainersList = getTopGainers(cryptoData, 3);
+      setTopGainers(topGainersList);
+      
       setLastUpdated(new Date());
       setLoading(false);
     } catch (err) {
-      console.error('Error fetching crypto data:', err);
+      console.error('Error fetching data:', err);
       setError('Failed to fetch cryptocurrency data. Please try again later.');
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCryptoData();
+    fetchAllData();
     
     // Set up auto-refresh every 2 minutes
-    const intervalId = setInterval(fetchCryptoData, 2 * 60 * 1000);
+    const intervalId = setInterval(fetchAllData, 2 * 60 * 1000);
     
     return () => clearInterval(intervalId);
   }, []);
@@ -68,7 +89,7 @@ export default function Home() {
         </h1>
         
         {lastUpdated && (
-          <p className="text-gray-500 mb-8">
+          <p className="text-gray-500 mb-6">
             Last updated: {format(lastUpdated, 'MMM d, yyyy h:mm a')}
           </p>
         )}
@@ -82,7 +103,7 @@ export default function Home() {
             <h3 className="text-lg font-medium text-danger mb-2">Error</h3>
             <p className="text-gray-600">{error}</p>
             <button
-              onClick={fetchCryptoData}
+              onClick={fetchAllData}
               className="mt-4 px-4 py-2 bg-primaryBlue text-white rounded-md hover:bg-secondaryBlue transition-colors duration-200"
             >
               Try Again
@@ -90,12 +111,22 @@ export default function Home() {
           </div>
         ) : (
           <>
+            <MarketOverview 
+              globalMarketCap={globalMarketCap}
+              globalMarketCapChange={globalMarketCapChange}
+              volume24h={volume24h}
+              volumeChange={volumeChange}
+              trendingCoins={trendingCoins}
+              topGainers={topGainers}
+              isLoading={loading}
+            />
+            
             <SearchBar onSearch={setSearchTerm} />
             <CryptoList coins={coins} searchTerm={searchTerm} />
             
             <div className="flex justify-center mt-12">
               <button
-                onClick={fetchCryptoData}
+                onClick={fetchAllData}
                 className="px-6 py-2 bg-primaryBlue text-white rounded-md hover:bg-secondaryBlue transition-all duration-200 shadow-soft flex items-center"
               >
                 <svg

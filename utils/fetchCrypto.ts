@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { mockCryptoData } from './mockData';
 import { generateMockHistoryForCoin, mockHistoryMap } from './mockHistoryData';
+import { CryptoCoin } from '../types';
 
 export interface CryptoData {
   id: string;
@@ -24,91 +25,157 @@ const USE_MOCK_ON_FAILURE = true;
 let lastApiRequest = 0;
 const MIN_REQUEST_INTERVAL = 10000; // 10 seconds between requests
 
-export const fetchCryptoData = async (): Promise<CryptoData[]> => {
+// Fetch cryptocurrency market data
+export async function fetchCryptoData(): Promise<CryptoCoin[]> {
   try {
     // Check if we're making requests too frequently
     const now = Date.now();
     if (now - lastApiRequest < MIN_REQUEST_INTERVAL) {
-      console.warn('API requests too frequent, using cached or mock data');
-      return USE_MOCK_ON_FAILURE ? mockCryptoData : [];
+      console.warn('API requests too frequent, waiting before making a new request');
+      await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL));
     }
     
-    lastApiRequest = now;
+    lastApiRequest = Date.now();
     console.log('Fetching cryptocurrency data from CoinGecko API...');
     
     const response = await axios.get(
-      'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false',
+      'https://api.coingecko.com/api/v3/coins/markets',
       {
+        params: {
+          vs_currency: 'usd',
+          order: 'market_cap_desc',
+          per_page: 100,
+          page: 1,
+          sparkline: true,
+          price_change_percentage: '7d',
+        },
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        timeout: 10000 // 10 second timeout
+        timeout: 15000 // 15 second timeout
       }
     );
-
-    console.log("Fetched Crypto Data:", response.data);
-
+    
     if (!response.data || !Array.isArray(response.data)) {
-      console.error('Invalid response format:', response.data);
-      return USE_MOCK_ON_FAILURE ? mockCryptoData : [];
+      console.error('Invalid response format from CoinGecko API');
+      throw new Error('Invalid response format');
     }
+    
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching crypto data:', error);
+    throw error;
+  }
+}
 
-    // Clean up and transform the data
-    const cryptoData = response.data.map((coin: any) => {
-      // Ensure all required fields exist and are of the correct type
-      const processedCoin = {
-        id: coin.id || `unknown-${Math.random().toString(36).substring(7)}`,
-        name: coin.name || 'Unknown Coin',
-        symbol: (coin.symbol || 'UNK').toUpperCase(),
-        image: coin.image || `https://via.placeholder.com/64?text=${coin.symbol || 'UNK'}`,
-        current_price: typeof coin.current_price === 'number' ? coin.current_price : 0,
-        price_change_percentage_24h: typeof coin.price_change_percentage_24h === 'number' ? coin.price_change_percentage_24h : 0,
-        market_cap: typeof coin.market_cap === 'number' ? coin.market_cap : 0
-      };
-      
-      return processedCoin;
+// Fetch global market data
+export async function fetchGlobalMarketData() {
+  try {
+    // Check if we're making requests too frequently
+    const now = Date.now();
+    if (now - lastApiRequest < MIN_REQUEST_INTERVAL) {
+      console.warn('API requests too frequent, waiting before making a new request');
+      await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL));
+    }
+    
+    lastApiRequest = Date.now();
+    
+    const response = await axios.get('https://api.coingecko.com/api/v3/global', {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      timeout: 15000
     });
+    
+    if (!response.data || !response.data.data) {
+      console.error('Invalid global market data response format');
+      throw new Error('Invalid global market data response');
+    }
+    
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching global market data:', error);
+    throw error;
+  }
+}
 
-    console.log("Transformed Crypto Data:", cryptoData);
-    // Verify that current_price values are valid numbers
-    const hasInvalidPrices = cryptoData.some(coin => 
-      typeof coin.current_price !== 'number' || 
-      isNaN(coin.current_price)
+// Fetch trending coins data
+export async function fetchTrendingCoins(): Promise<CryptoCoin[]> {
+  try {
+    // Check if we're making requests too frequently
+    const now = Date.now();
+    if (now - lastApiRequest < MIN_REQUEST_INTERVAL) {
+      console.warn('API requests too frequent, waiting before making a new request');
+      await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL));
+    }
+    
+    lastApiRequest = Date.now();
+    
+    // First get the trending coin ids
+    const trendingResponse = await axios.get('https://api.coingecko.com/api/v3/search/trending', {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      timeout: 15000
+    });
+    
+    if (!trendingResponse.data || !trendingResponse.data.coins) {
+      console.error('Invalid trending coins response format');
+      throw new Error('Invalid trending coins response');
+    }
+    
+    const coinIds = trendingResponse.data.coins
+      .map((coin: any) => coin.item.id)
+      .slice(0, 7);
+    
+    if (coinIds.length === 0) {
+      console.warn('No trending coin IDs found');
+      return [];
+    }
+    
+    // Small delay between API calls to avoid rate limiting
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    lastApiRequest = Date.now();
+    
+    // Then fetch detailed data for those coins
+    const idsParam = coinIds.join(',');
+    const detailedResponse = await axios.get(
+      'https://api.coingecko.com/api/v3/coins/markets',
+      {
+        params: {
+          vs_currency: 'usd',
+          ids: idsParam,
+        },
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        timeout: 15000
+      }
     );
     
-    if (hasInvalidPrices) {
-      console.error('Found invalid price values in API response');
-    }
-
-    return cryptoData;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Axios error fetching crypto data:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data
-      });
-      
-      // Check for rate limiting (common with CoinGecko free tier)
-      if (error.response?.status === 429) {
-        console.error('Rate limit exceeded. Using mock data instead.');
-        return mockCryptoData;
-      }
-      
-      // Handle timeout errors more specifically
-      if (error.code === 'ECONNABORTED') {
-        console.error('API request timed out. Using mock data instead.');
-        return USE_MOCK_ON_FAILURE ? mockCryptoData : [];
-      }
-    } else {
-      console.error('Error fetching crypto data:', error);
+    if (!detailedResponse.data || !Array.isArray(detailedResponse.data)) {
+      console.error('Invalid coin details response format');
+      throw new Error('Invalid coin details response');
     }
     
-    // Return mock data if configured to do so
-    return USE_MOCK_ON_FAILURE ? mockCryptoData : [];
+    return detailedResponse.data;
+  } catch (error) {
+    console.error('Error fetching trending coins:', error);
+    throw error;
   }
-};
+}
+
+// Get top gainers from a list of coins
+export function getTopGainers(coins: CryptoCoin[], limit: number = 3): CryptoCoin[] {
+  return [...coins]
+    .filter(coin => !isNaN(coin.price_change_percentage_24h))
+    .sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h)
+    .slice(0, limit);
+}
 
 // Store historical data cache to minimize API calls
 const historyCache: Record<string, { data: PriceHistoryData[], timestamp: number }> = {};

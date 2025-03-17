@@ -1,13 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import ThemeToggle from './ThemeToggle';
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  onHighlightsToggle?: (showHighlights: boolean) => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ onHighlightsToggle }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showHighlights, setShowHighlights] = useState(true);
+  
+  // Initialize state from localStorage on component mount
+  useEffect(() => {
+    const storedHighlights = localStorage.getItem('showHighlights');
+    if (storedHighlights !== null) {
+      const parsedValue = storedHighlights === 'true';
+      setShowHighlights(parsedValue);
+      if (onHighlightsToggle) {
+        onHighlightsToggle(parsedValue);
+      }
+    }
+  }, [onHighlightsToggle]);
   
   // Handler for theme changes
   const handleThemeChange = (darkMode: boolean) => {
     setIsDarkMode(darkMode);
+  };
+  
+  // Handler for highlights toggle
+  const toggleHighlights = () => {
+    const newValue = !showHighlights;
+    setShowHighlights(newValue);
+    localStorage.setItem('showHighlights', String(newValue));
+    if (onHighlightsToggle) {
+      onHighlightsToggle(newValue);
+    }
   };
 
   return (
@@ -31,6 +58,23 @@ const Navbar: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-600">Highlights</span>
+              <button
+                onClick={toggleHighlights}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                  showHighlights ? 'bg-primaryBlue' : 'bg-gray-300'
+                }`}
+                aria-pressed={showHighlights}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    showHighlights ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+            
             <ThemeToggle onThemeChange={handleThemeChange} />
             <a 
               href="https://www.coingecko.com/en/api" 

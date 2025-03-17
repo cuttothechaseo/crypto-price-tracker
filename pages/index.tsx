@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import Navbar from '../components/Navbar';
 import SearchBar from '../components/SearchBar';
 import CryptoList from '../components/CryptoList';
+import MarketOverview from '../components/MarketOverview';
 import { CryptoCoin } from '../types';
 
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showHighlights, setShowHighlights] = useState(true);
   
   const fetchCryptoData = async () => {
     try {
@@ -43,11 +45,22 @@ export default function Home() {
     }
   };
 
+  // Handle highlights toggle from navbar
+  const handleHighlightsToggle = (value: boolean) => {
+    setShowHighlights(value);
+  };
+
   useEffect(() => {
     fetchCryptoData();
     
     // Set up auto-refresh every 2 minutes
     const intervalId = setInterval(fetchCryptoData, 2 * 60 * 1000);
+    
+    // Initialize highlights preference from localStorage
+    const storedHighlights = localStorage.getItem('showHighlights');
+    if (storedHighlights !== null) {
+      setShowHighlights(storedHighlights === 'true');
+    }
     
     return () => clearInterval(intervalId);
   }, []);
@@ -60,7 +73,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.svg" />
       </Head>
 
-      <Navbar />
+      <Navbar onHighlightsToggle={handleHighlightsToggle} />
       
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-darkGray mb-2">
@@ -90,6 +103,8 @@ export default function Home() {
           </div>
         ) : (
           <>
+            {showHighlights && <MarketOverview />}
+            
             <SearchBar onSearch={setSearchTerm} />
             <CryptoList coins={coins} searchTerm={searchTerm} />
             

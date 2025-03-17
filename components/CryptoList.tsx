@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import CoinCard from './CoinCard';
 import SortDropdown, { SortOption } from './SortDropdown';
 import { CryptoCoin } from '../types';
@@ -11,30 +11,43 @@ interface CryptoListProps {
 const CryptoList: React.FC<CryptoListProps> = ({ coins, searchTerm }) => {
   const [sortBy, setSortBy] = useState<SortOption>('rank');
   
-  const filteredCoins = searchTerm
-    ? coins.filter(
-        (coin) =>
-          coin.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          coin.symbol.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : coins;
-
-  const sortedCoins = [...filteredCoins].sort((a, b) => {
-    switch (sortBy) {
-      case 'rank':
-        return a.market_cap_rank - b.market_cap_rank;
-      case 'name':
-        return a.name.localeCompare(b.name);
-      case 'price':
-        return b.current_price - a.current_price;
-      case 'marketCap':
-        return b.market_cap - a.market_cap;
-      case 'priceChange':
-        return b.price_change_percentage_24h - a.price_change_percentage_24h;
-      default:
-        return 0;
+  const filteredCoins = useMemo(() => {
+    if (!searchTerm) {
+      return coins;
     }
-  });
+    
+    const normalizedSearchTerm = searchTerm.toLowerCase();
+    return coins.filter(
+      (coin) =>
+        coin.name.toLowerCase().includes(normalizedSearchTerm) ||
+        coin.symbol.toLowerCase().includes(normalizedSearchTerm)
+    );
+  }, [coins, searchTerm]);
+
+  const sortedCoins = useMemo(() => {
+    return [...filteredCoins].sort((a, b) => {
+      switch (sortBy) {
+        case 'rank':
+          // Ensure coins without rank are pushed to the end
+          if (!a.market_cap_rank) return 1;
+          if (!b.market_cap_rank) return -1;
+          return a.market_cap_rank - b.market_cap_rank;
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'price':
+          return b.current_price - a.current_price;
+        case 'marketCap':
+          return b.market_cap - a.market_cap;
+        case 'priceChange':
+          // Handle cases where price change percentage might be undefined or NaN
+          const aChange = a.price_change_percentage_24h ?? 0;
+          const bChange = b.price_change_percentage_24h ?? 0;
+          return isNaN(bChange) ? -1 : isNaN(aChange) ? 1 : bChange - aChange;
+        default:
+          return 0;
+      }
+    });
+  }, [filteredCoins, sortBy]);
 
   return (
     <div>
@@ -45,11 +58,7 @@ const CryptoList: React.FC<CryptoListProps> = ({ coins, searchTerm }) => {
         <SortDropdown currentSort={sortBy} onSort={setSortBy} />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Grid decoration */}
-        <div className="absolute -top-4 -left-4 w-8 h-8 border-l-2 border-t-2 border-cyberPurple opacity-70"></div>
-        <div className="absolute -bottom-4 -right-4 w-8 h-8 border-r-2 border-b-2 border-electricBlue opacity-70"></div>
-        
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative">
         {sortedCoins.length > 0 ? (
           sortedCoins.map((coin) => <CoinCard key={coin.id} coin={coin} />)
         ) : (

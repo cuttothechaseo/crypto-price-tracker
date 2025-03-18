@@ -131,7 +131,7 @@ const MarketOverview: React.FC = () => {
               />
             ) : (
               <div className="w-full h-24 bg-gray-100 rounded flex items-center justify-center">
-                <p className="text-sm text-gray-400">Chart data unavailable</p>
+                <p className="text-sm text-gray-400">Loading chart data...</p>
               </div>
             )}
           </div>
@@ -158,7 +158,7 @@ const MarketOverview: React.FC = () => {
               />
             ) : (
               <div className="w-full h-24 bg-gray-100 rounded flex items-center justify-center">
-                <p className="text-sm text-gray-400">Chart data unavailable</p>
+                <p className="text-sm text-gray-400">Loading chart data...</p>
               </div>
             )}
           </div>

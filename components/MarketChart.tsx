@@ -58,10 +58,10 @@ export const MarketChart: React.FC<MarketChartProps> = ({
   data, 
   color,
   height = 100,
-  tooltipEnabled = true,
+  tooltipEnabled = false,
   areaEnabled = true,
   gradientId = 'marketGradient',
-  strokeWidth = 2
+  strokeWidth = 1.5
 }) => {
   // Format timestamp to be more readable
   const formattedData = data.map(item => ({
@@ -86,12 +86,12 @@ export const MarketChart: React.FC<MarketChartProps> = ({
         {areaEnabled ? (
           <AreaChart
             data={formattedData}
-            margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+            margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
           >
             <defs>
               <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={color} stopOpacity={0.3} />
-                <stop offset="95%" stopColor={color} stopOpacity={0} />
+                <stop offset="5%" stopColor={color} stopOpacity={0.15} />
+                <stop offset="95%" stopColor={color} stopOpacity={0.01} />
               </linearGradient>
             </defs>
             <XAxis 
@@ -114,14 +114,15 @@ export const MarketChart: React.FC<MarketChartProps> = ({
               strokeWidth={strokeWidth}
               fillOpacity={1}
               fill={`url(#${gradientId})`}
-              activeDot={{ r: 4 }}
+              activeDot={tooltipEnabled ? { r: 4, strokeWidth: 0 } : false}
+              dot={false}
               isAnimationActive={false}
             />
           </AreaChart>
         ) : (
           <LineChart
             data={formattedData}
-            margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+            margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
           >
             <XAxis 
               dataKey="timestamp" 
@@ -142,8 +143,8 @@ export const MarketChart: React.FC<MarketChartProps> = ({
               stroke={color} 
               strokeWidth={strokeWidth}
               dot={false}
+              activeDot={tooltipEnabled ? { r: 4, strokeWidth: 0 } : false}
               isAnimationActive={false}
-              activeDot={{ r: 4 }}
             />
           </LineChart>
         )}

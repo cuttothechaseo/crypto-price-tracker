@@ -54,6 +54,11 @@ const MarketOverview: React.FC = () => {
     return `$${value.toLocaleString()}`;
   };
 
+  // Format full numerical value with commas
+  const formatFullNumber = (value: number): string => {
+    return `$${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+  };
+
   // Format percentage change
   const formatPercentage = (value: number): string => {
     return `${value > 0 ? '+' : ''}${value.toFixed(2)}%`;
@@ -110,22 +115,24 @@ const MarketOverview: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {/* Global Market Cap */}
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 col-span-1 md:col-span-2">
-          <div className="flex justify-between items-start mb-2">
-            <p className="text-gray-500 text-sm">Market Cap</p>
-            <span className={`text-xs px-2 py-0.5 rounded-full ${globalData.market_cap_change_percentage_24h_usd >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-danger'}`}>
-              {formatPercentage(globalData.market_cap_change_percentage_24h_usd)}
+          <div className="flex items-center mb-2">
+            <p className="text-xl font-semibold text-darkGray">
+              {formatFullNumber(globalData.total_market_cap.usd)}
+            </p>
+          </div>
+          <div className="flex items-center mb-3">
+            <p className="text-gray-500">Market Cap</p>
+            <span className={`ml-2 text-sm font-medium ${globalData.market_cap_change_percentage_24h_usd >= 0 ? 'text-green-600' : 'text-danger'}`}>
+              {globalData.market_cap_change_percentage_24h_usd >= 0 ? '↑' : '↓'} {Math.abs(globalData.market_cap_change_percentage_24h_usd).toFixed(1)}%
             </span>
           </div>
-          <p className="text-2xl font-semibold text-darkGray">
-            {formatLargeNumber(globalData.total_market_cap.usd)}
-          </p>
           
           {/* Market Cap Chart */}
-          <div className="mt-3 h-24">
+          <div className="mt-1">
             {marketChartData && marketChartData.marketCap && marketChartData.marketCap.length > 0 ? (
               <MarketChart 
                 data={marketChartData.marketCap} 
-                color="#007BFF" 
+                color={globalData.market_cap_change_percentage_24h_usd >= 0 ? "#22c55e" : "#ef4444"} 
                 height={90}
                 gradientId="marketCapGradient"
               />
@@ -139,20 +146,19 @@ const MarketOverview: React.FC = () => {
         
         {/* 24h Trading Volume */}
         <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 col-span-1 md:col-span-2">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-gray-500 text-sm">24h Trading Volume</p>
-            <FaExchangeAlt className="text-primaryBlue" />
+          <div className="mb-2">
+            <p className="text-xl font-semibold text-darkGray">
+              {formatFullNumber(globalData.total_volume.usd)}
+            </p>
           </div>
-          <p className="text-2xl font-semibold text-darkGray">
-            {formatLargeNumber(globalData.total_volume.usd)}
-          </p>
+          <p className="text-gray-500 mb-3">24h Trading Volume</p>
           
           {/* Trading Volume Chart */}
-          <div className="mt-3 h-24">
+          <div className="mt-1">
             {marketChartData && marketChartData.volume && marketChartData.volume.length > 0 ? (
               <MarketChart 
                 data={marketChartData.volume} 
-                color="#6c757d" 
+                color="#ef4444" 
                 height={90}
                 gradientId="volumeGradient"
               />
@@ -162,10 +168,6 @@ const MarketOverview: React.FC = () => {
               </div>
             )}
           </div>
-          
-          <p className="text-xs text-gray-500 mt-2">
-            {((globalData.total_volume.usd / globalData.total_market_cap.usd) * 100).toFixed(1)}% of market cap
-          </p>
         </div>
         
         {/* Trending Coins */}

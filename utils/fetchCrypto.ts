@@ -187,14 +187,15 @@ const trendingCoinsCache: { data: any[], timestamp: number } = { data: [], times
 
 /**
  * Fetches trending coins data
+ * @param count Number of trending coins to return (default is 3 for dashboard)
  */
-export async function fetchTrendingCoins() {
+export async function fetchTrendingCoins(count: number = 3) {
   try {
     const now = Date.now();
     
     // Check if we have cached data that's still fresh (15 minutes)
     if (trendingCoinsCache.data.length > 0 && now - trendingCoinsCache.timestamp < 15 * 60 * 1000) {
-      return trendingCoinsCache.data;
+      return trendingCoinsCache.data.slice(0, count);
     }
     
     const response = await axios.get("https://api.coingecko.com/api/v3/search/trending", {
@@ -209,16 +210,16 @@ export async function fetchTrendingCoins() {
       throw new Error('Invalid response format');
     }
     
-    // Cache the data
-    trendingCoinsCache.data = response.data.coins.slice(0, 3);
+    // Cache all trending coins
+    trendingCoinsCache.data = response.data.coins;
     trendingCoinsCache.timestamp = now;
     
-    return response.data.coins.slice(0, 3);
+    return response.data.coins.slice(0, count);
   } catch (error) {
     console.error('Error fetching trending coins:', error);
     
     // Return cached data if available, otherwise return empty array
-    return trendingCoinsCache.data || [];
+    return trendingCoinsCache.data.slice(0, count) || [];
   }
 }
 
@@ -227,14 +228,20 @@ const topGainersCache: { data: any[], timestamp: number } = { data: [], timestam
 
 /**
  * Fetches top gaining coins data
+ * @param count Number of top gainers to return (default is 3 for dashboard)
  */
-export async function fetchTopGainers() {
+export async function fetchTopGainers(count: number = 3) {
   try {
     const now = Date.now();
     
     // Check if we have cached data that's still fresh (15 minutes)
     if (topGainersCache.data.length > 0 && now - topGainersCache.timestamp < 15 * 60 * 1000) {
-      return topGainersCache.data;
+      // If we need more items than we have cached, make a new request
+      if (count > topGainersCache.data.length) {
+        // Skip cache and fetch new data
+      } else {
+        return topGainersCache.data.slice(0, count);
+      }
     }
     
     const response = await axios.get(
@@ -243,7 +250,7 @@ export async function fetchTopGainers() {
         params: {
           vs_currency: 'usd',
           order: 'percent_change_24h_desc',
-          per_page: 3,
+          per_page: Math.max(count, 10), // Always fetch at least 10 to have good cache
           page: 1,
           sparkline: false
         },
@@ -259,15 +266,15 @@ export async function fetchTopGainers() {
       throw new Error('Invalid response format');
     }
     
-    // Cache the data
+    // Cache all fetched gainers
     topGainersCache.data = response.data;
     topGainersCache.timestamp = now;
     
-    return response.data;
+    return response.data.slice(0, count);
   } catch (error) {
     console.error('Error fetching top gainers:', error);
     
     // Return cached data if available, otherwise return empty array
-    return topGainersCache.data || [];
+    return topGainersCache.data.slice(0, count) || [];
   }
 } 

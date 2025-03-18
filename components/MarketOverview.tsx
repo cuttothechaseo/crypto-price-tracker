@@ -1,75 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import { fetchGlobalMarketData, fetchTrendingCoins, fetchTopGainers } from '../utils/fetchCrypto';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FaFire, FaRocket, FaChartLine, FaExchangeAlt, FaChevronRight } from 'react-icons/fa';
+import dynamic from 'next/dynamic';
+import useCryptoStore from '../store/useCryptoStore';
 
-interface GlobalMarketData {
-  total_market_cap: { usd: number };
-  total_volume: { usd: number };
-  market_cap_percentage: { [key: string]: number };
-  market_cap_change_percentage_24h_usd: number;
-}
-
-interface TrendingCoin {
-  item: {
-    id: string;
-    name: string;
-    symbol: string;
-    thumb: string;
-    price_btc: number;
-    market_cap_rank: number;
-    score: number;
-  };
-}
-
-interface TopGainer {
-  id: string;
-  name: string;
-  symbol: string;
-  image: string;
-  current_price: number;
-  price_change_percentage_24h: number;
-}
+// Lazy load the chart component for better performance
+const MarketChart = dynamic(() => import('./MarketChart'), { 
+  ssr: false,
+  loading: () => (
+    <div className="animate-pulse bg-gray-200 h-24 w-full rounded"></div>
+  )
+});
 
 const MarketOverview: React.FC = () => {
-  const [globalData, setGlobalData] = useState<GlobalMarketData | null>(null);
-  const [trendingCoins, setTrendingCoins] = useState<TrendingCoin[]>([]);
-  const [topGainers, setTopGainers] = useState<TopGainer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Get data and actions from the store
+  const { 
+    globalData, 
+    trendingCoins, 
+    topGainers, 
+    marketChartData,
+    loading, 
+    error,
+    lastUpdated,
+    fetchAllData 
+  } = useCryptoStore();
 
+  // Fetch data on component mount and set up refresh interval
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Fetch all data in parallel
-        const [globalDataResponse, trendingCoinsResponse, topGainersResponse] = await Promise.all([
-          fetchGlobalMarketData(),
-          fetchTrendingCoins(),
-          fetchTopGainers()
-        ]);
-        
-        setGlobalData(globalDataResponse);
-        setTrendingCoins(trendingCoinsResponse);
-        setTopGainers(topGainersResponse);
-      } catch (err) {
-        console.error('Error fetching market overview data:', err);
-        setError('Failed to load market data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+    // Initial data fetch
+    fetchAllData();
     
     // Refresh data every 5 minutes
-    const intervalId = setInterval(fetchData, 5 * 60 * 1000);
+    const intervalId = setInterval(fetchAllData, 5 * 60 * 1000);
     
+    // Clean up interval on unmount
     return () => clearInterval(intervalId);
-  }, []);
+  }, [fetchAllData]);
 
   // Format large numbers
   const formatCurrency = (value: number): string => {
@@ -92,7 +59,7 @@ const MarketOverview: React.FC = () => {
     return `${value > 0 ? '+' : ''}${value.toFixed(2)}%`;
   };
 
-  if (loading) {
+  if (loading && !globalData) {
     return (
       <div className="animate-pulse bg-white rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
         <div className="h-6 bg-gray-200 rounded mb-6 w-1/3"></div>
@@ -106,10 +73,16 @@ const MarketOverview: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (error && !globalData) {
     return (
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
         <p className="text-danger text-center">{error}</p>
+        <button 
+          onClick={fetchAllData}
+          className="mt-4 px-4 py-2 mx-auto block bg-primaryBlue text-white rounded-md hover:bg-secondaryBlue transition-colors duration-200"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
@@ -136,7 +109,7 @@ const MarketOverview: React.FC = () => {
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {/* Global Market Cap */}
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 col-span-1 md:col-span-2">
           <div className="flex justify-between items-start mb-2">
             <p className="text-gray-500 text-sm">Market Cap</p>
             <span className={`text-xs px-2 py-0.5 rounded-full ${globalData.market_cap_change_percentage_24h_usd >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-danger'}`}>
@@ -147,17 +120,25 @@ const MarketOverview: React.FC = () => {
             {formatLargeNumber(globalData.total_market_cap.usd)}
           </p>
           
-          {/* Small chart visualization */}
-          <div className="mt-2 flex items-center">
-            <div className="w-full h-4 relative">
-              <div className={`absolute inset-0 ${globalData.market_cap_change_percentage_24h_usd >= 0 ? 'bg-green-100' : 'bg-red-100'} rounded h-1 mt-1.5`}></div>
-              <div className={`absolute inset-0 ${globalData.market_cap_change_percentage_24h_usd >= 0 ? 'bg-green-500' : 'bg-red-500'} rounded h-1 mt-1.5`} style={{ width: `${Math.min(Math.abs(globalData.market_cap_change_percentage_24h_usd) * 2, 100)}%` }}></div>
-            </div>
+          {/* Market Cap Chart */}
+          <div className="mt-3 h-24">
+            {marketChartData && marketChartData.marketCap && marketChartData.marketCap.length > 0 ? (
+              <MarketChart 
+                data={marketChartData.marketCap} 
+                color="#007BFF" 
+                height={90}
+                gradientId="marketCapGradient"
+              />
+            ) : (
+              <div className="w-full h-24 bg-gray-100 rounded flex items-center justify-center">
+                <p className="text-sm text-gray-400">Chart data unavailable</p>
+              </div>
+            )}
           </div>
         </div>
         
         {/* 24h Trading Volume */}
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 col-span-1 md:col-span-2">
           <div className="flex items-center justify-between mb-2">
             <p className="text-gray-500 text-sm">24h Trading Volume</p>
             <FaExchangeAlt className="text-primaryBlue" />
@@ -166,18 +147,25 @@ const MarketOverview: React.FC = () => {
             {formatLargeNumber(globalData.total_volume.usd)}
           </p>
           
-          {/* Visualization of volume as percentage of market cap */}
-          <div className="mt-2">
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
-              <div 
-                className="bg-primaryBlue h-1.5 rounded-full" 
-                style={{ width: `${Math.min((globalData.total_volume.usd / globalData.total_market_cap.usd) * 100, 100)}%` }}
-              ></div>
-            </div>
-            <p className="text-xs text-gray-500 mt-1">
-              {((globalData.total_volume.usd / globalData.total_market_cap.usd) * 100).toFixed(1)}% of market cap
-            </p>
+          {/* Trading Volume Chart */}
+          <div className="mt-3 h-24">
+            {marketChartData && marketChartData.volume && marketChartData.volume.length > 0 ? (
+              <MarketChart 
+                data={marketChartData.volume} 
+                color="#6c757d" 
+                height={90}
+                gradientId="volumeGradient"
+              />
+            ) : (
+              <div className="w-full h-24 bg-gray-100 rounded flex items-center justify-center">
+                <p className="text-sm text-gray-400">Chart data unavailable</p>
+              </div>
+            )}
           </div>
+          
+          <p className="text-xs text-gray-500 mt-2">
+            {((globalData.total_volume.usd / globalData.total_market_cap.usd) * 100).toFixed(1)}% of market cap
+          </p>
         </div>
         
         {/* Trending Coins */}

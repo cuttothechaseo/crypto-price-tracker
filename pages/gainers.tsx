@@ -1,26 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
-import { fetchTopGainers } from '../utils/fetchCrypto';
 import Navbar from '../components/Navbar';
 import { FaRocket, FaArrowLeft } from 'react-icons/fa';
-
-interface TopGainer {
-  id: string;
-  name: string;
-  symbol: string;
-  image: string;
-  current_price: number;
-  price_change_percentage_24h: number;
-  market_cap: number;
-  market_cap_rank: number;
-}
+import useCryptoStore from '../store/useCryptoStore';
 
 const GainersPage: React.FC = () => {
-  const [topGainers, setTopGainers] = useState<TopGainer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { topGainers, loading, error, fetchTopGainersData } = useCryptoStore();
 
   // Format large numbers
   const formatCurrency = (value: number): string => {
@@ -44,32 +31,9 @@ const GainersPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // For this page, we want more gainers than just 3
-        const response = await fetch(
-          'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=percent_change_24h_desc&per_page=25&page=1&sparkline=false'
-        );
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch data');
-        }
-        
-        const data = await response.json();
-        setTopGainers(data);
-      } catch (err) {
-        console.error('Error fetching top gainers data:', err);
-        setError('Failed to load top gainers data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+    // Fetch more top gainers for the detailed page (25)
+    fetchTopGainersData(25);
+  }, [fetchTopGainersData]);
 
   return (
     <div className="min-h-screen bg-lightGray">
@@ -99,7 +63,7 @@ const GainersPage: React.FC = () => {
             </h2>
           </div>
           
-          {loading ? (
+          {loading && topGainers.length === 0 ? (
             <div className="animate-pulse space-y-4">
               {[...Array(10)].map((_, index) => (
                 <div key={index} className="flex items-center py-3 border-b border-gray-100">
@@ -116,11 +80,11 @@ const GainersPage: React.FC = () => {
                 </div>
               ))}
             </div>
-          ) : error ? (
+          ) : error && topGainers.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-danger text-lg">{error}</p>
               <button
-                onClick={() => window.location.reload()}
+                onClick={() => fetchTopGainersData(25)}
                 className="mt-4 px-4 py-2 bg-primaryBlue text-white rounded-md hover:bg-secondaryBlue transition-colors duration-200"
               >
                 Try Again

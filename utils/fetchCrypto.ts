@@ -277,4 +277,62 @@ export async function fetchTopGainers(count: number = 3) {
     // Return cached data if available, otherwise return empty array
     return topGainersCache.data.slice(0, count) || [];
   }
+}
+
+// Store market chart data cache
+const marketChartCache: { data: any, timestamp: number } = { data: null, timestamp: 0 };
+
+/**
+ * Fetches 7-day historical market cap and volume data
+ */
+export async function fetchMarketChart(days: number = 7) {
+  try {
+    const now = Date.now();
+    
+    // Check if we have cached data that's still fresh (30 minutes)
+    if (marketChartCache.data && now - marketChartCache.timestamp < 30 * 60 * 1000) {
+      return marketChartCache.data;
+    }
+    
+    const response = await axios.get(
+      `https://api.coingecko.com/api/v3/global/market_cap_chart?days=${days}`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        timeout: 10000
+      }
+    );
+    
+    if (!response.data || !response.data.market_cap_chart || !response.data.volume_chart) {
+      throw new Error('Invalid market chart data format');
+    }
+    
+    // Transform the data for easier consumption by charts
+    const transformedData = {
+      marketCap: response.data.market_cap_chart.map((item: [number, number]) => ({
+        timestamp: item[0],
+        value: item[1]
+      })),
+      volume: response.data.volume_chart.map((item: [number, number]) => ({
+        timestamp: item[0],
+        value: item[1]
+      }))
+    };
+    
+    // Cache the data
+    marketChartCache.data = transformedData;
+    marketChartCache.timestamp = now;
+    
+    return transformedData;
+  } catch (error) {
+    console.error('Error fetching market chart data:', error);
+    
+    // Return cached data if available, otherwise return empty arrays
+    return marketChartCache.data || { 
+      marketCap: [], 
+      volume: [] 
+    };
+  }
 } 

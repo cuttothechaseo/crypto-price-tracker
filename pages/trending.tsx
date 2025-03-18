@@ -1,46 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
-import { fetchTrendingCoins } from '../utils/fetchCrypto';
 import Navbar from '../components/Navbar';
 import { FaFire, FaArrowLeft } from 'react-icons/fa';
-
-interface TrendingCoin {
-  item: {
-    id: string;
-    name: string;
-    symbol: string;
-    thumb: string;
-    large?: string;
-    price_btc: number;
-    market_cap_rank: number;
-    score: number;
-  };
-}
+import useCryptoStore from '../store/useCryptoStore';
 
 const TrendingPage: React.FC = () => {
-  const [trendingCoins, setTrendingCoins] = useState<TrendingCoin[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { trendingCoins, loading, error, fetchTrendingCoinsData } = useCryptoStore();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await fetchTrendingCoins();
-        setTrendingCoins(data);
-      } catch (err) {
-        console.error('Error fetching trending data:', err);
-        setError('Failed to load trending data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+    // Fetch more trending coins for the detailed page (up to 10)
+    fetchTrendingCoinsData(10);
+  }, [fetchTrendingCoinsData]);
 
   return (
     <div className="min-h-screen bg-lightGray">
@@ -70,7 +42,7 @@ const TrendingPage: React.FC = () => {
             </h2>
           </div>
           
-          {loading ? (
+          {loading && trendingCoins.length === 0 ? (
             <div className="animate-pulse space-y-4">
               {[...Array(7)].map((_, index) => (
                 <div key={index} className="flex items-center py-3 border-b border-gray-100">
@@ -83,11 +55,11 @@ const TrendingPage: React.FC = () => {
                 </div>
               ))}
             </div>
-          ) : error ? (
+          ) : error && trendingCoins.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-danger text-lg">{error}</p>
               <button
-                onClick={() => window.location.reload()}
+                onClick={() => fetchTrendingCoinsData(10)}
                 className="mt-4 px-4 py-2 bg-primaryBlue text-white rounded-md hover:bg-secondaryBlue transition-colors duration-200"
               >
                 Try Again

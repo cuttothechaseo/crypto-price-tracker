@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250" width="250" height="250">
+  <!-- Background -->
+  <rect width="250" height="250" fill="#f9e6c8" />
+  
+  <!-- Decorative elements -->
+  <g>
+    <!-- Swirls and flourishes -->
+    <path d="M125,20 C50,20 20,90 20,125 C20,180 75,230 125,230 C175,230 230,180 230,125 C230,90 200,20 125,20 Z" fill="none" stroke="#2a9d8f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <!-- Orange decorative swirls -->
+    <path d="M125,40 C70,40 40,90 40,125 C40,170 80,210 125,210 C170,210 210,170 210,125 C210,90 180,40 125,40 Z" fill="none" stroke="#e76f51" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <!-- Flourishes -->
+    <path d="M20,80 C30,70 40,75 30,90" fill="none" stroke="#e76f51" stroke-width="4" stroke-linecap="round" />
+    <path d="M230,80 C220,70 210,75 220,90" fill="none" stroke="#2a9d8f" stroke-width="4" stroke-linecap="round" />
+    <path d="M20,180 C30,190 40,185 30,170" fill="none" stroke="#2a9d8f" stroke-width="4" stroke-linecap="round" />
+    <path d="M230,180 C220,190 210,185 220,170" fill="none" stroke="#e76f51" stroke-width="4" stroke-linecap="round" />
+    
+    <!-- Stars/sparkles -->
+    <path d="M40,40 L45,45 M35,45 L45,35" fill="none" stroke="#e9c46a" stroke-width="3" stroke-linecap="round" />
+    <path d="M210,40 L215,45 M205,45 L215,35" fill="none" stroke="#e9c46a" stroke-width="3" stroke-linecap="round" />
+    <path d="M40,210 L45,215 M35,215 L45,205" fill="none" stroke="#e9c46a" stroke-width="3" stroke-linecap="round" />
+    <path d="M210,210 L215,215 M205,215 L215,205" fill="none" stroke="#e9c46a" stroke-width="3" stroke-linecap="round" />
+  </g>
+  
+  <!-- Bitcoin symbol -->
+  <g>
+    <!-- Circle -->
+    <circle cx="125" cy="125" r="65" fill="#f4a261" stroke="#e76f51" stroke-width="6" />
+    
+    <!-- B symbol -->
+    <path d="
+      M105,90
+      L130,90
+      C145,90 155,100 155,115
+      C155,125 148,133 140,135
+      C148,137 160,145 160,160
+      C160,175 145,185 130,185
+      L105,185
+      Z
+    " fill="none" stroke="#2d3047" stroke-width="8" stroke-linejoin="round" />
+    
+    <!-- Vertical line -->
+    <line x1="115" y1="80" x2="115" y2="190" stroke="#2d3047" stroke-width="8" stroke-linecap="round" />
+    
+    <!-- Horizontal lines -->
+    <line x1="105" y1="90" x2="125" y2="90" stroke="#2d3047" stroke-width="8" stroke-linecap="round" />
+    <line x1="105" y1="135" x2="135" y2="135" stroke="#2d3047" stroke-width="8" stroke-linecap="round" />
+    <line x1="105" y1="185" x2="125" y2="185" stroke="#2d3047" stroke-width="8" stroke-linecap="round" />
+  </g>
+  
+  <!-- Additional decorative dots -->
+  <g>
+    <circle cx="50" cy="60" r="2" fill="#2d3047" />
+    <circle cx="200" cy="60" r="2" fill="#2d3047" />
+    <circle cx="50" cy="190" r="2" fill="#2d3047" />
+    <circle cx="200" cy="190" r="2" fill="#2d3047" />
+    <circle cx="60" cy="125" r="2" fill="#2d3047" />
+    <circle cx="190" cy="125" r="2" fill="#2d3047" />
+    <circle cx="125" cy="60" r="2" fill="#2d3047" />
+    <circle cx="125" cy="190" r="2" fill="#2d3047" />
+  </g>
+</svg> 

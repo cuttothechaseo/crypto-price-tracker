@@ -8,44 +8,49 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Modern white & blue theme colors
-        primaryBlue: "#007BFF",
-        secondaryBlue: "#0056b3",
-        lightBlue: "#E6F3FF",
-        lightGray: "#F8F9FA",
-        mediumGray: "#E9ECEF",
-        darkGray: "#343A40",
-        subtleGray: "#F1F3F5",
+        // Fantasy-inspired vintage theme
+        background: '#F5E0C3',
+        card: '#F3DDA1',
+        accent: '#5F4B32',
+        text: '#3B2E2A',
+        border: '#AD8453',
+        highlight: '#D95F18',
+        shadow: '#3D3026',
         
-        // Update primary colors to match blue theme
-        primary: {
-          50: '#e6f3ff',
-          100: '#cce7ff',
-          200: '#99ceff',
-          300: '#66b5ff',
-          400: '#339cff',
-          500: '#007BFF', // primaryBlue as primary
-          600: '#0056b3', // secondaryBlue
-          700: '#004494',
-          800: '#003166',
-          900: '#001f3f',
+        // Keep vintage theme colors for compatibility
+        vintage: {
+          background: "#f9e6c8", // Beige background
+          orange: "#e76f51",     // Deep orange
+          lightOrange: "#f4a261", // Light orange
+          teal: "#2a9d8f",       // Teal/green
+          gold: "#e9c46a",       // Gold yellow
+          dark: "#2d3047",       // Dark blue-gray
         },
-        
-        // Keep success and danger colors but make them more modern
-        success: '#28a745',
-        danger: '#dc3545',
+
+        // Success and error colors
+        success: '#57844B',
+        danger: '#A13325',
+      },
+      fontFamily: {
+        serif: ['"Cinzel"', 'serif'],
+        body: ['"EB Garamond"', 'serif'],
+        'arvo': ['Arvo', 'serif'],
+        'josefin': ['Josefin Sans', 'sans-serif'],
       },
       boxShadow: {
-        'soft': '0 2px 8px rgba(0, 0, 0, 0.05)',
-        'card': '0 4px 6px rgba(0, 0, 0, 0.04)',
-        'hover': '0 10px 15px rgba(0, 0, 0, 0.03)',
-        'button': '0 4px 6px rgba(0, 123, 255, 0.25)',
-      },
-      animation: {
-        'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'soft': '0 2px 8px rgba(61, 48, 38, 0.15)',
+        'card': '0 4px 10px rgba(61, 48, 38, 0.12)',
+        'hover': '0 8px 20px rgba(61, 48, 38, 0.18)',
+        'button': '0 4px 6px rgba(217, 95, 24, 0.25)',
+        'scroll': '0 4px 10px rgba(61, 48, 38, 0.25)',
       },
       backgroundImage: {
-        'gradient-blue': 'linear-gradient(135deg, #007BFF, #0056b3)',
+        'grain': "url('/images/grain.png')",
+        'parchment': "url('/images/parchment-texture.png')",
+        'gradient-vintage': 'linear-gradient(135deg, #AD8453, #F3DDA1)',
+      },
+      borderWidth: {
+        '3': '3px',
       },
     },
   },

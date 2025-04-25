@@ -1,0 +1,45 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer border frame -->
+  <rect x="8" y="8" width="384" height="384" stroke="#5F4B32" stroke-width="2" stroke-opacity="0.8"/>
+  
+  <!-- Corner decorative elements -->
+  <!-- Top Left Corner -->
+  <path d="M8 8C8 8 30 30 60 30C90 30 90 8 90 8" stroke="#5F4B32" stroke-width="2.5"/>
+  <path d="M8 8C8 8 30 60 30 90C30 120 8 120 8 120" stroke="#5F4B32" stroke-width="2.5"/>
+  <circle cx="30" cy="30" r="4" fill="#5F4B32" fill-opacity="0.7"/>
+  
+  <!-- Top Right Corner -->
+  <path d="M392 8C392 8 370 30 340 30C310 30 310 8 310 8" stroke="#5F4B32" stroke-width="2.5"/>
+  <path d="M392 8C392 8 370 60 370 90C370 120 392 120 392 120" stroke="#5F4B32" stroke-width="2.5"/>
+  <circle cx="370" cy="30" r="4" fill="#5F4B32" fill-opacity="0.7"/>
+  
+  <!-- Bottom Left Corner -->
+  <path d="M8 392C8 392 30 370 60 370C90 370 90 392 90 392" stroke="#5F4B32" stroke-width="2.5"/>
+  <path d="M8 392C8 392 30 340 30 310C30 280 8 280 8 280" stroke="#5F4B32" stroke-width="2.5"/>
+  <circle cx="30" cy="370" r="4" fill="#5F4B32" fill-opacity="0.7"/>
+  
+  <!-- Bottom Right Corner -->
+  <path d="M392 392C392 392 370 370 340 370C310 370 310 392 310 392" stroke="#5F4B32" stroke-width="2.5"/>
+  <path d="M392 392C392 392 370 340 370 310C370 280 392 280 392 280" stroke="#5F4B32" stroke-width="2.5"/>
+  <circle cx="370" cy="370" r="4" fill="#5F4B32" fill-opacity="0.7"/>
+  
+  <!-- Midpoint decorations on each side -->
+  <!-- Top midpoint -->
+  <path d="M180 8C180 8 200 20 220 8" stroke="#5F4B32" stroke-width="2"/>
+  <circle cx="200" cy="14" r="3" fill="#5F4B32" fill-opacity="0.7"/>
+  
+  <!-- Right midpoint -->
+  <path d="M392 180C392 180 380 200 392 220" stroke="#5F4B32" stroke-width="2"/>
+  <circle cx="386" cy="200" r="3" fill="#5F4B32" fill-opacity="0.7"/>
+  
+  <!-- Bottom midpoint -->
+  <path d="M180 392C180 392 200 380 220 392" stroke="#5F4B32" stroke-width="2"/>
+  <circle cx="200" cy="386" r="3" fill="#5F4B32" fill-opacity="0.7"/>
+  
+  <!-- Left midpoint -->
+  <path d="M8 180C8 180 20 200 8 220" stroke="#5F4B32" stroke-width="2"/>
+  <circle cx="14" cy="200" r="3" fill="#5F4B32" fill-opacity="0.7"/>
+  
+  <!-- Subtle inner border -->
+  <rect x="20" y="20" width="360" height="360" stroke="#5F4B32" stroke-width="1" stroke-opacity="0.3"/>
+</svg> 

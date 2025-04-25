@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 interface SearchBarProps {
-  onSearch: (searchTerm: string) => void;
+  onSearch: (term: string) => void;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -14,59 +13,103 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
     onSearch(value);
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(searchTerm);
+  };
+
   return (
-    <div className="w-full max-w-md mx-auto mb-6">
-      <div className={`relative transition-all duration-200 ${isFocused ? 'shadow-soft' : ''}`}>
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg
-            className={`h-5 w-5 transition-colors duration-200 ${
-              isFocused ? 'text-primaryBlue' : 'text-gray-400'
-            }`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+    <div className="relative mb-6">
+      <div className="max-w-2xl mx-auto">
+        <form onSubmit={handleSubmit} className="relative">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg
+                className="h-5 w-5 text-vintage-teal"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+
+            <input
+              type="text"
+              className="bg-vintage-beige/40 border-2 border-vintage-teal/40 rounded-md pl-12 pr-12 py-3 w-full shadow-sm focus:ring-vintage-orange focus:border-vintage-orange focus:outline-none transition-all duration-300 text-vintage-dark placeholder-vintage-dark/60"
+              placeholder="Search for treasures..."
+              value={searchTerm}
+              onChange={handleChange}
+            />
+
+            {/* Vintage paper texture overlay */}
+            <div className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-20">
+              <div className="w-full h-full bg-[url('/images/paper-texture.svg')] bg-cover"></div>
+            </div>
+
+            {/* Decorative elements */}
+            <div className="absolute top-0 right-0 h-full flex items-center mr-3">
+              <svg
+                viewBox="0 0 50 50"
+                width="24"
+                height="24"
+                className="text-vintage-orange opacity-70"
+              >
+                <circle
+                  cx="25"
+                  cy="25"
+                  r="20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeDasharray="4 2"
+                />
+                <circle
+                  cx="25"
+                  cy="25"
+                  r="10"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                />
+                <circle cx="25" cy="25" r="3" fill="currentColor" />
+              </svg>
+            </div>
+          </div>
+        </form>
+
+        <div className="text-center mt-2 text-sm font-serif italic text-vintage-dark/70">
+          Seek knowledge of coins ancient and modern
+        </div>
+
+        {/* Decorative bottom flourish */}
+        <div className="flex justify-center mt-1">
+          <svg width="120" height="10" className="text-vintage-teal/40">
+            <line
+              x1="0"
+              y1="5"
+              x2="120"
+              y2="5"
+              stroke="currentColor"
+              strokeWidth="1"
+              strokeDasharray="1 3"
+            />
+            <circle
+              cx="60"
+              cy="5"
+              r="3"
+              fill="currentColor"
+              fillOpacity="0.3"
             />
           </svg>
         </div>
-        <input
-          type="text"
-          className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-400 text-darkGray focus:outline-none focus:ring-2 focus:ring-primaryBlue/40 focus:border-primaryBlue transition-all duration-200"
-          placeholder="Search cryptocurrencies..."
-          value={searchTerm}
-          onChange={handleChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-        />
-        {searchTerm && (
-          <button
-            className="absolute inset-y-0 right-0 pr-3 flex items-center"
-            onClick={() => {
-              setSearchTerm('');
-              onSearch('');
-            }}
-          >
-            <svg
-              className="h-5 w-5 text-gray-400 hover:text-danger transition-colors duration-200"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
-        )}
       </div>
     </div>
   );
 };
 
-export default SearchBar; 
+export default SearchBar;

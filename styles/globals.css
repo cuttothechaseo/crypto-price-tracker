@@ -3,17 +3,21 @@
 @tailwind utilities;
 
 /* Import fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Arvo:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
 
 @layer base {
   body {
-    @apply bg-lightGray text-darkGray;
-    font-family: 'Inter', sans-serif;
+    @apply bg-background text-text;
+    font-family: 'EB Garamond', serif;
+    background-image: url('/images/paper-texture.svg'), url('/images/grain.png');
+    background-repeat: repeat;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-['DM_Sans',_sans-serif] font-medium;
+    @apply font-serif font-semibold text-accent;
   }
   
   /* Custom scrollbar */
@@ -22,56 +26,233 @@
   }
   
   ::-webkit-scrollbar-track {
-    @apply bg-lightGray;
+    @apply bg-background;
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 hover:bg-gray-400;
+    @apply bg-border hover:bg-accent;
     border-radius: 4px;
   }
 
   /* Selection color */
   ::selection {
-    @apply bg-primaryBlue text-white;
+    @apply bg-highlight text-white;
   }
 }
 
 @layer components {
-  .card {
-    @apply bg-white rounded-lg border border-gray-200 shadow-card 
-      hover:shadow-hover hover:border-primaryBlue/20 hover:scale-[1.01]
-      transition-all duration-200;
+  /* Main fantasy scroll container */
+  .fantasy-container {
+    @apply max-w-7xl mx-auto p-4 relative mb-12;
+    background-color: #F5E0C3;
+    border: 12px solid #AD8453;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(61, 48, 38, 0.2);
+    position: relative;
+    overflow: hidden;
+    background-image: url('/images/paper-texture.svg');
+    background-repeat: repeat;
   }
   
-  .btn {
-    @apply px-4 py-2 rounded-md font-medium transition-all duration-200;
+  .fantasy-container::before,
+  .fantasy-container::after {
+    content: '';
+    position: absolute;
+    height: 40px;
+    width: 100%;
+    left: 0;
+    background-image: url('/images/scroll-edge.svg');
+    background-repeat: repeat-x;
+    z-index: 10;
+  }
+
+  .fantasy-container::before {
+    top: -5px;
+    transform: rotate(180deg);
+  }
+
+  .fantasy-container::after {
+    bottom: -5px;
   }
   
-  .btn-primary {
-    @apply bg-primaryBlue text-white hover:bg-secondaryBlue;
+  /* Header styles for fantasy look */
+  .fantasy-header {
+    @apply text-4xl md:text-5xl font-bold mb-8 text-center;
+    font-family: 'Cinzel', serif;
+    color: #5F4B32;
+    text-shadow: 1px 1px 0 rgba(61, 48, 38, 0.2);
   }
   
-  .btn-secondary {
-    @apply bg-white border border-primaryBlue text-primaryBlue
-      hover:bg-lightBlue;
+  .fantasy-subheader {
+    @apply text-xl text-center mb-6 font-body;
+    color: #5F4B32;
   }
   
-  .text-gradient {
-    @apply text-transparent bg-clip-text bg-gradient-blue;
+  .fantasy-card {
+    @apply bg-card rounded-xl p-4 transition-all duration-200 relative;
+    border: 4px solid #AD8453;
+    box-shadow: 0 4px 10px rgba(61, 48, 38, 0.2);
+    overflow: hidden;
+    background-image: url('/images/paper-texture.svg');
+    background-repeat: repeat;
+    background-size: 800px;
+  }
+  
+  .fantasy-card::before,
+  .fantasy-card::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.8;
+  }
+
+  .fantasy-card::before {
+    top: 0;
+    left: 0;
+    background-image: url('/images/scroll-corner.svg');
+  }
+
+  .fantasy-card::after {
+    bottom: 0;
+    right: 0;
+    background-image: url('/images/scroll-corner.svg');
+    transform: rotate(180deg);
+  }
+  
+  .fantasy-btn {
+    @apply px-4 py-2 rounded-md font-medium transition-all duration-300 font-body bg-border text-white;
+    @apply hover:bg-highlight hover:text-white hover:shadow-button;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .fantasy-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/images/paper-texture.svg');
+    background-size: 500px;
+    opacity: 0.1;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+  
+  .fantasy-btn-primary {
+    @apply bg-highlight text-white hover:bg-highlight/90 shadow-button;
+  }
+  
+  .fantasy-btn-secondary {
+    @apply bg-card border-2 border-border text-accent
+      hover:bg-accent/10;
   }
   
   /* Input styles */
-  .input-field {
-    @apply border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-primaryBlue/50 focus:border-primaryBlue transition-all duration-200;
+  .fantasy-input {
+    @apply border-2 border-border rounded-md py-2 px-3 
+      bg-card text-text
+      focus:outline-none focus:ring-2 focus:ring-highlight/50 focus:border-highlight/70 
+      transition-all duration-200;
+    font-family: 'EB Garamond', serif;
+    background-image: url('/images/paper-texture.svg');
+    background-size: 500px;
+    background-repeat: repeat;
+  }
+  
+  .fantasy-search {
+    @apply py-3 px-4 rounded-full w-full;
+    background-color: #F3DDA1;
+    border: 3px solid #AD8453;
+    color: #3B2E2A;
+    font-family: 'EB Garamond', serif;
+    box-shadow: 2px 2px 0 rgba(61, 48, 38, 0.15);
+    background-image: url('/images/paper-texture.svg');
+    background-size: 500px;
+    background-repeat: repeat;
   }
   
   /* Card hover effect */
-  .hover-scale {
+  .fantasy-hover-scale {
     @apply transition-transform duration-200 hover:scale-[1.02];
   }
   
-  /* Table styles */
-  .table-row {
-    @apply border-b border-gray-200 hover:bg-lightBlue transition-colors duration-150;
+  /* Decorative elements */
+  .fantasy-divider {
+    height: 3px;
+    background: linear-gradient(to right, transparent, #AD8453, transparent);
+    margin: 1.5rem 0;
+  }
+  
+  .fantasy-border {
+    @apply border-2 border-border;
+  }
+
+  /* Border with vintage decoration */
+  .vintage-border {
+    position: relative;
+  }
+
+  .vintage-border::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/images/vintage-border.svg');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  .fantasy-badge {
+    @apply inline-flex items-center justify-center px-2 py-1 text-xs font-medium 
+      text-white bg-accent rounded-full;
+  }
+  
+  /* Price colors */
+  .price-positive {
+    @apply text-success;
+  }
+  
+  .price-negative {
+    @apply text-danger;
+  }
+  
+  /* Ornate corners for cards */
+  .corner-decor {
+    @apply absolute w-12 h-12 opacity-70;
+    z-index: 10;
+  }
+  
+  .corner-decor-tl {
+    @apply top-0 left-0;
+  }
+  
+  .corner-decor-tr {
+    @apply top-0 right-0 rotate-90;
+  }
+  
+  .corner-decor-bl {
+    @apply bottom-0 left-0 -rotate-90;
+  }
+  
+  .corner-decor-br {
+    @apply bottom-0 right-0 rotate-180;
+  }
+  
+  /* Icon styling */
+  .fantasy-icon {
+    @apply text-border transition-colors duration-200;
+  }
+  
+  .fantasy-icon:hover {
+    @apply text-highlight;
   }
 } 

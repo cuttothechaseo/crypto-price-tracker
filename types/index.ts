@@ -1,4 +1,4 @@
-export interface CryptoCoin {
+export interface Coin {
   id: string;
   symbol: string;
   name: string;
@@ -16,4 +16,7 @@ export interface CryptoCoin {
 export interface PriceHistoryData {
   timestamp: number;
   price: number;
-} 
+}
+
+// Legacy type for backward compatibility
+export type CryptoCoin = Coin; 

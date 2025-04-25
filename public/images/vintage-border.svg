@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="800" height="1100" viewBox="0 0 800 1100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="1100" fill="#E0AC30" />
+  
+  <!-- Border pattern with flourishes -->
+  <!-- Top left corner flourish -->
+  <path d="M50,50 C70,60 100,50 120,70 S130,100 150,120 S190,130 200,150 S210,180 220,190 S250,200 270,200"
+        fill="none" stroke="#236B45" stroke-width="8" stroke-linecap="round" />
+  <path d="M80,80 C90,90 110,80 120,90 S140,110 150,120"
+        fill="none" stroke="#D86C29" stroke-width="5" stroke-linecap="round" />
+  <path d="M180,140 C190,150 200,160 210,170"
+        fill="none" stroke="#D86C29" stroke-width="5" stroke-linecap="round" />
+  
+  <!-- Top right corner flourish - mirrored -->
+  <path d="M750,50 C730,60 700,50 680,70 S670,100 650,120 S610,130 600,150 S590,180 580,190 S550,200 530,200"
+        fill="none" stroke="#236B45" stroke-width="8" stroke-linecap="round" />
+  <path d="M720,80 C710,90 690,80 680,90 S660,110 650,120"
+        fill="none" stroke="#D86C29" stroke-width="5" stroke-linecap="round" />
+  <path d="M620,140 C610,150 600,160 590,170"
+        fill="none" stroke="#D86C29" stroke-width="5" stroke-linecap="round" />
+  
+  <!-- Bottom left corner flourish -->
+  <path d="M50,1050 C70,1040 100,1050 120,1030 S130,1000 150,980 S190,970 200,950 S210,920 220,910 S250,900 270,900"
+        fill="none" stroke="#236B45" stroke-width="8" stroke-linecap="round" />
+  <path d="M80,1020 C90,1010 110,1020 120,1010 S140,990 150,980"
+        fill="none" stroke="#D86C29" stroke-width="5" stroke-linecap="round" />
+  <path d="M180,960 C190,950 200,940 210,930"
+        fill="none" stroke="#D86C29" stroke-width="5" stroke-linecap="round" />
+  
+  <!-- Bottom right corner flourish - mirrored -->
+  <path d="M750,1050 C730,1040 700,1050 680,1030 S670,1000 650,980 S610,970 600,950 S590,920 580,910 S550,900 530,900"
+        fill="none" stroke="#236B45" stroke-width="8" stroke-linecap="round" />
+  <path d="M720,1020 C710,1010 690,1020 680,1010 S660,990 650,980"
+        fill="none" stroke="#D86C29" stroke-width="5" stroke-linecap="round" />
+  <path d="M620,960 C610,950 600,940 590,930"
+        fill="none" stroke="#D86C29" stroke-width="5" stroke-linecap="round" />
+  
+  <!-- Left side border -->
+  <path d="M50,270 C70,300 60,330 70,360 S90,390 80,420 S70,450 80,480 S100,510 90,540 S80,570 90,600 S110,630 100,660 S90,690 100,720 S120,750 110,780 S100,810 110,840 S130,870 120,900"
+        fill="none" stroke="#236B45" stroke-width="8" stroke-linecap="round" />
+  <path d="M70,300 C75,320 65,340 70,360 M70,420 C75,440 65,460 70,480 M70,540 C75,560 65,580 70,600 M70,660 C75,680 65,700 70,720 M70,780 C75,800 65,820 70,840"
+        fill="none" stroke="#D86C29" stroke-width="5" stroke-linecap="round" />
+  
+  <!-- Right side border -->
+  <path d="M750,270 C730,300 740,330 730,360 S710,390 720,420 S730,450 720,480 S700,510 710,540 S720,570 710,600 S690,630 700,660 S710,690 700,720 S680,750 690,780 S700,810 690,840 S670,870 680,900"
+        fill="none" stroke="#236B45" stroke-width="8" stroke-linecap="round" />
+  <path d="M730,300 C725,320 735,340 730,360 M730,420 C725,440 735,460 730,480 M730,540 C725,560 735,580 730,600 M730,660 C725,680 735,700 730,720 M730,780 C725,800 735,820 730,840"
+        fill="none" stroke="#D86C29" stroke-width="5" stroke-linecap="round" />
+  
+  <!-- Center flourish -->
+  <circle cx="400" cy="550" r="5" fill="#236B45" opacity="0.8" />
+  <circle cx="400" cy="550" r="15" fill="none" stroke="#236B45" stroke-width="2" opacity="0.6" />
+  <circle cx="400" cy="550" r="25" fill="none" stroke="#236B45" stroke-width="1" opacity="0.4" />
+  
+  <!-- Additional decorative elements -->
+  <circle cx="150" cy="200" r="4" fill="#D86C29" opacity="0.9" />
+  <circle cx="650" cy="200" r="4" fill="#D86C29" opacity="0.9" />
+  <circle cx="150" cy="900" r="4" fill="#D86C29" opacity="0.9" />
+  <circle cx="650" cy="900" r="4" fill="#D86C29" opacity="0.9" />
+  
+  <!-- Subtle texture overlay -->
+  <rect width="800" height="1100" fill="#000000" opacity="0.03" />
+</svg> 

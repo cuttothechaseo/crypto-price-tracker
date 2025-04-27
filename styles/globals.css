@@ -7,17 +7,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap');
 
 @layer base {
   body {
-    @apply bg-background text-text;
-    font-family: 'EB Garamond', serif;
-    background-image: url('/images/paper-texture.svg'), url('/images/grain.png');
+    @apply bg-vintage-bg text-vintage-text;
+    font-family: 'Merriweather', serif;
+    background-image: url('/images/vintage-background-pattern.svg'), url('/images/grain.png');
     background-repeat: repeat;
+    position: relative;
+    overflow-x: hidden;
   }
   
+  /* Ornate border removed */
+  
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif font-semibold text-accent;
+    @apply font-vintage-header font-semibold text-vintage-header-text;
   }
   
   /* Custom scrollbar */
@@ -26,21 +32,217 @@
   }
   
   ::-webkit-scrollbar-track {
-    @apply bg-background;
+    @apply bg-vintage-bg;
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply bg-border hover:bg-accent;
+    @apply bg-vintage-card-border hover:bg-vintage-accent-pattern;
     border-radius: 4px;
   }
 
   /* Selection color */
   ::selection {
-    @apply bg-highlight text-white;
+    @apply bg-vintage-accent-pattern text-white;
   }
 }
 
 @layer components {
+  /* Main vintage container */
+  .vintage-container {
+    @apply max-w-7xl mx-auto p-4 relative mb-12;
+    background-color: #f0cb7a;
+    border: 12px solid #15803d;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+    background-image: url('/images/vintage-texture.svg');
+    background-repeat: repeat;
+  }
+  
+  .vintage-container::before,
+  .vintage-container::after {
+    content: '';
+    position: absolute;
+    height: 40px;
+    width: 100%;
+    left: 0;
+    background-image: url('/images/ornate-border.svg');
+    background-repeat: repeat-x;
+    z-index: 10;
+  }
+
+  .vintage-container::before {
+    top: -5px;
+    transform: rotate(180deg);
+  }
+
+  .vintage-container::after {
+    bottom: -5px;
+  }
+  
+  /* Header styles for vintage look */
+  .vintage-title {
+    @apply text-4xl md:text-5xl font-bold mb-8 text-center;
+    font-family: 'Playfair Display', serif;
+    color: #78350f;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+  }
+  
+  .vintage-subtitle {
+    @apply text-xl text-center mb-6;
+    font-family: 'Merriweather', serif;
+    color: #78350f;
+  }
+  
+  .vintage-card {
+    @apply bg-vintage-card-bg rounded-xl p-4 transition-all duration-200 relative;
+    border: 4px solid #15803d;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    background-image: url('/images/vintage-texture.svg');
+    background-repeat: repeat;
+  }
+  
+  /* Ornate corner styling for cards */
+  .ornate-corner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    pointer-events: none;
+  }
+  
+  .ornate-corner-tl {
+    top: 0;
+    left: 0;
+    border-top: 3px solid #15803d;
+    border-left: 3px solid #15803d;
+    border-top-left-radius: 5px;
+  }
+  
+  .ornate-corner-tr {
+    top: 0;
+    right: 0;
+    border-top: 3px solid #15803d;
+    border-right: 3px solid #15803d;
+    border-top-right-radius: 5px;
+  }
+  
+  .ornate-corner-bl {
+    bottom: 0;
+    left: 0;
+    border-bottom: 3px solid #15803d;
+    border-left: 3px solid #15803d;
+    border-bottom-left-radius: 5px;
+  }
+  
+  .ornate-corner-br {
+    bottom: 0;
+    right: 0;
+    border-bottom: 3px solid #15803d;
+    border-right: 3px solid #15803d;
+    border-bottom-right-radius: 5px;
+  }
+  
+  .vintage-btn {
+    @apply px-4 py-2 rounded-md font-medium transition-all duration-300 font-vintage-body bg-vintage-card-border text-white;
+    @apply hover:bg-vintage-accent-pattern hover:text-white hover:shadow-button;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .vintage-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/images/vintage-texture.svg');
+    background-size: 500px;
+    opacity: 0.1;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+  
+  .vintage-btn-primary {
+    @apply bg-vintage-accent-pattern text-white hover:bg-vintage-accent-pattern/90 shadow-button;
+  }
+  
+  .vintage-btn-secondary {
+    @apply bg-vintage-card-bg border-2 border-vintage-card-border text-vintage-header-text
+      hover:bg-vintage-card-border/10;
+  }
+  
+  /* Input styles */
+  .vintage-input {
+    @apply border-2 border-vintage-card-border rounded-md py-2 px-3 
+      bg-vintage-card-bg text-vintage-text
+      focus:outline-none focus:ring-2 focus:ring-vintage-accent-pattern/50 focus:border-vintage-accent-pattern/70 
+      transition-all duration-200;
+    font-family: 'Merriweather', serif;
+    background-image: url('/images/vintage-texture.svg');
+    background-size: 500px;
+    background-repeat: repeat;
+  }
+  
+  .vintage-search {
+    @apply py-3 px-4 rounded-full w-full;
+    background-color: #f0cb7a;
+    border: 3px solid #15803d;
+    color: #78350f;
+    font-family: 'Merriweather', serif;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.15);
+    background-image: url('/images/vintage-texture.svg');
+    background-size: 500px;
+    background-repeat: repeat;
+  }
+  
+  /* Card hover effect */
+  .vintage-hover-scale {
+    @apply transition-transform duration-200 hover:scale-[1.02];
+  }
+  
+  /* Decorative elements */
+  .vintage-divider {
+    height: 3px;
+    background: linear-gradient(to right, transparent, #15803d, transparent);
+    margin: 1.5rem 0;
+  }
+  
+  .vintage-border {
+    position: relative;
+  }
+
+  .vintage-border::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/images/ornate-border.svg');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  .vintage-badge {
+    @apply inline-flex items-center justify-center px-2 py-1 text-xs font-medium 
+      text-white bg-vintage-card-border rounded-full;
+  }
+  
+  /* Price colors */
+  .price-positive {
+    @apply text-vintage-accent-green;
+  }
+  
+  .price-negative {
+    @apply text-vintage-accent-red;
+  }
+  
+  /* Keep the fantasy styles for backward compatibility */
   /* Main fantasy scroll container */
   .fantasy-container {
     @apply max-w-7xl mx-auto p-4 relative mb-12;

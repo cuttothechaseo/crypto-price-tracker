@@ -2,9 +2,13 @@ import React, { useState } from "react";
 
 interface SearchBarProps {
   onSearch: (term: string) => void;
+  placeholder?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
+const SearchBar: React.FC<SearchBarProps> = ({
+  onSearch,
+  placeholder = "Search cryptocurrencies...",
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,13 +23,23 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   };
 
   return (
-    <div className="relative mb-6">
-      <div className="max-w-2xl mx-auto">
-        <form onSubmit={handleSubmit} className="relative">
+    <div className="relative w-full">
+      <div className="max-w-xl mx-auto w-full">
+        <form onSubmit={handleSubmit} className="relative w-full">
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            {/* Enhanced ornate border with vintage styling */}
+            <div className="absolute -inset-1 sm:-inset-1.5 border-2 border-vintage-card-border rounded-full opacity-90 z-0"></div>
+
+            {/* Decorative corner elements - smaller on mobile */}
+            <div className="absolute -top-1 -left-1 w-3 sm:w-4 h-3 sm:h-4 border-t-2 border-l-2 border-vintage-accent-pattern rounded-tl-full z-10"></div>
+            <div className="absolute -top-1 -right-1 w-3 sm:w-4 h-3 sm:h-4 border-t-2 border-r-2 border-vintage-accent-pattern rounded-tr-full z-10"></div>
+            <div className="absolute -bottom-1 -left-1 w-3 sm:w-4 h-3 sm:h-4 border-b-2 border-l-2 border-vintage-accent-pattern rounded-bl-full z-10"></div>
+            <div className="absolute -bottom-1 -right-1 w-3 sm:w-4 h-3 sm:h-4 border-b-2 border-r-2 border-vintage-accent-pattern rounded-br-full z-10"></div>
+
+            {/* Search icon with vintage styling */}
+            <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none z-10">
               <svg
-                className="h-5 w-5 text-vintage-teal"
+                className="h-4 w-4 sm:h-5 sm:w-5 text-vintage-card-border"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
                 fill="currentColor"
@@ -40,73 +54,30 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
 
             <input
               type="text"
-              className="bg-vintage-beige/40 border-2 border-vintage-teal/40 rounded-md pl-12 pr-12 py-3 w-full shadow-sm focus:ring-vintage-orange focus:border-vintage-orange focus:outline-none transition-all duration-300 text-vintage-dark placeholder-vintage-dark/60"
-              placeholder="Search for treasures..."
+              className="bg-vintage-card-bg border-2 border-vintage-card-border rounded-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2 sm:py-3 w-full shadow-md
+                        focus:ring-vintage-accent-pattern focus:border-vintage-card-border focus:outline-none 
+                        transition-all duration-300 text-vintage-header-text placeholder-vintage-text/60 
+                        font-vintage-body text-sm sm:text-base relative z-0"
+              style={{
+                backgroundImage: "url('/images/vintage-texture.svg')",
+                backgroundRepeat: "repeat",
+                backgroundSize: "200px",
+              }}
+              placeholder={placeholder}
               value={searchTerm}
               onChange={handleChange}
             />
 
-            {/* Vintage paper texture overlay */}
-            <div className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-20">
-              <div className="w-full h-full bg-[url('/images/paper-texture.svg')] bg-cover"></div>
-            </div>
-
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 h-full flex items-center mr-3">
-              <svg
-                viewBox="0 0 50 50"
-                width="24"
-                height="24"
-                className="text-vintage-orange opacity-70"
-              >
-                <circle
-                  cx="25"
-                  cy="25"
-                  r="20"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeDasharray="4 2"
-                />
-                <circle
-                  cx="25"
-                  cy="25"
-                  r="10"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1"
-                />
-                <circle cx="25" cy="25" r="3" fill="currentColor" />
-              </svg>
+            {/* Decorative element on right side - smaller on mobile */}
+            <div className="absolute top-0 right-0 h-full flex items-center mr-3 sm:mr-4 z-10">
+              <div className="w-5 sm:w-6 h-5 sm:h-6 rounded-full flex items-center justify-center relative">
+                <div className="w-4 sm:w-5 h-4 sm:h-5 border-2 border-vintage-card-border rounded-full absolute"></div>
+                <div className="w-2 sm:w-3 h-2 sm:h-3 bg-vintage-accent-pattern/30 rounded-full absolute"></div>
+                <div className="w-1 h-1 bg-vintage-accent-pattern rounded-full absolute"></div>
+              </div>
             </div>
           </div>
         </form>
-
-        <div className="text-center mt-2 text-sm font-serif italic text-vintage-dark/70">
-          Seek knowledge of coins ancient and modern
-        </div>
-
-        {/* Decorative bottom flourish */}
-        <div className="flex justify-center mt-1">
-          <svg width="120" height="10" className="text-vintage-teal/40">
-            <line
-              x1="0"
-              y1="5"
-              x2="120"
-              y2="5"
-              stroke="currentColor"
-              strokeWidth="1"
-              strokeDasharray="1 3"
-            />
-            <circle
-              cx="60"
-              cy="5"
-              r="3"
-              fill="currentColor"
-              fillOpacity="0.3"
-            />
-          </svg>
-        </div>
       </div>
     </div>
   );

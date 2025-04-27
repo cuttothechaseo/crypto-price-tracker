@@ -8,6 +8,7 @@ export interface Coin {
   market_cap_rank: number;
   price_change_percentage_24h: number;
   price_change_percentage_7d_in_currency?: number;
+  total_volume?: number;
   sparkline_in_7d?: {
     price: number[];
   };

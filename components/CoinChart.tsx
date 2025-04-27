@@ -2,9 +2,10 @@ import React from "react";
 
 interface CoinChartProps {
   coinId: string;
+  chartColor?: string;
 }
 
-const CoinChart: React.FC<CoinChartProps> = ({ coinId }) => {
+const CoinChart: React.FC<CoinChartProps> = ({ coinId, chartColor }) => {
   // Generate random chart data based on coinId for consistent display
   const seed = coinId
     .split("")
@@ -36,15 +37,18 @@ const CoinChart: React.FC<CoinChartProps> = ({ coinId }) => {
     return points.join(" ");
   };
 
-  const chartColor =
-    coinId.includes("bitcoin") || parseFloat(coinId) % 2 === 0
-      ? "rgba(21, 128, 61, 0.7)" // Green for bitcoin and even ids
-      : "rgba(180, 62, 37, 0.7)"; // Red for odd ids
+  // Use provided chartColor or determine based on coinId
+  const lineColor =
+    chartColor ||
+    (coinId.includes("bitcoin")
+      ? "#00D4FF" // Cyan for Bitcoin
+      : coinId.includes("ethereum")
+      ? "#FF00FF" // Magenta for Ethereum
+      : coinId.includes("tether")
+      ? "#39FF14" // Green for Tether
+      : "#00D4FF"); // Default cyan
 
-  const chartFill =
-    coinId.includes("bitcoin") || parseFloat(coinId) % 2 === 0
-      ? "rgba(21, 128, 61, 0.1)"
-      : "rgba(180, 62, 37, 0.1)";
+  const chartFill = `${lineColor}20`; // 20% opacity version of the line color
 
   const pathData = generatePoints();
 
@@ -65,36 +69,40 @@ const CoinChart: React.FC<CoinChartProps> = ({ coinId }) => {
             y1="10"
             x2="100"
             y2="10"
-            stroke="rgba(120, 53, 15, 0.1)"
+            stroke="#B0B0B0"
             strokeWidth="0.5"
             strokeDasharray="1 1"
+            strokeOpacity="0.2"
           />
           <line
             x1="0"
             y1="20"
             x2="100"
             y2="20"
-            stroke="rgba(120, 53, 15, 0.1)"
+            stroke="#B0B0B0"
             strokeWidth="0.5"
             strokeDasharray="1 1"
+            strokeOpacity="0.2"
           />
           <line
             x1="0"
             y1="30"
             x2="100"
             y2="30"
-            stroke="rgba(120, 53, 15, 0.1)"
+            stroke="#B0B0B0"
             strokeWidth="0.5"
             strokeDasharray="1 1"
+            strokeOpacity="0.2"
           />
           <line
             x1="0"
             y1="40"
             x2="100"
             y2="40"
-            stroke="rgba(120, 53, 15, 0.1)"
+            stroke="#B0B0B0"
             strokeWidth="0.5"
             strokeDasharray="1 1"
+            strokeOpacity="0.2"
           />
 
           {/* Vertical time indicators */}
@@ -103,27 +111,30 @@ const CoinChart: React.FC<CoinChartProps> = ({ coinId }) => {
             y1="0"
             x2="25"
             y2="50"
-            stroke="rgba(120, 53, 15, 0.1)"
+            stroke="#B0B0B0"
             strokeWidth="0.5"
             strokeDasharray="1 1"
+            strokeOpacity="0.2"
           />
           <line
             x1="50"
             y1="0"
             x2="50"
             y2="50"
-            stroke="rgba(120, 53, 15, 0.1)"
+            stroke="#B0B0B0"
             strokeWidth="0.5"
             strokeDasharray="1 1"
+            strokeOpacity="0.2"
           />
           <line
             x1="75"
             y1="0"
             x2="75"
             y2="50"
-            stroke="rgba(120, 53, 15, 0.1)"
+            stroke="#B0B0B0"
             strokeWidth="0.5"
             strokeDasharray="1 1"
+            strokeOpacity="0.2"
           />
 
           {/* Chart area */}
@@ -133,10 +144,11 @@ const CoinChart: React.FC<CoinChartProps> = ({ coinId }) => {
           <polyline
             points={pathData.split(" 100,50 0,50")[0]}
             fill="none"
-            stroke={chartColor}
-            strokeWidth="1.5"
+            stroke={lineColor}
+            strokeWidth="2"
             strokeLinejoin="round"
             strokeLinecap="round"
+            style={{ filter: `drop-shadow(0 0 3px ${lineColor})` }}
           />
 
           {/* Circles at data points for emphasis */}
@@ -146,29 +158,64 @@ const CoinChart: React.FC<CoinChartProps> = ({ coinId }) => {
             .map((point, index) => {
               const [x, y] = point.split(",");
               return (
-                <circle key={index} cx={x} cy={y} r="1" fill={chartColor} />
+                <circle
+                  key={index}
+                  cx={x}
+                  cy={y}
+                  r="1.5"
+                  fill={lineColor}
+                  style={{ filter: `drop-shadow(0 0 2px ${lineColor})` }}
+                />
               );
             })}
         </svg>
       </div>
 
       {/* Chart message - only show for mobile or if specifically needed */}
-      <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-vintage-card-bg/50 md:hidden">
+      <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black/50 md:hidden backdrop-blur-sm">
         <div className="text-center">
-          <p className="text-vintage-header-text font-vintage-body mb-2 font-semibold">
+          <p className="text-white font-bold mb-2 text-glow">
             Chart data for {coinId.toUpperCase()}
           </p>
-          <p className="text-sm text-vintage-text opacity-80 font-vintage-body">
+          <p className="text-sm text-gray-300 opacity-80">
             Interactive charts coming soon
           </p>
         </div>
       </div>
 
-      {/* Ornate corner elements */}
-      <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-vintage-card-border opacity-50"></div>
-      <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-vintage-card-border opacity-50"></div>
-      <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-vintage-card-border opacity-50"></div>
-      <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-vintage-card-border opacity-50"></div>
+      {/* Neon corner elements */}
+      <div
+        className="absolute top-0 left-0 w-5 h-5 border-t border-l opacity-50"
+        style={{
+          borderColor: lineColor,
+          boxShadow: `0 0 5px ${lineColor}`,
+          borderWidth: "2px",
+        }}
+      ></div>
+      <div
+        className="absolute top-0 right-0 w-5 h-5 border-t border-r opacity-50"
+        style={{
+          borderColor: lineColor,
+          boxShadow: `0 0 5px ${lineColor}`,
+          borderWidth: "2px",
+        }}
+      ></div>
+      <div
+        className="absolute bottom-0 left-0 w-5 h-5 border-b border-l opacity-50"
+        style={{
+          borderColor: lineColor,
+          boxShadow: `0 0 5px ${lineColor}`,
+          borderWidth: "2px",
+        }}
+      ></div>
+      <div
+        className="absolute bottom-0 right-0 w-5 h-5 border-b border-r opacity-50"
+        style={{
+          borderColor: lineColor,
+          boxShadow: `0 0 5px ${lineColor}`,
+          borderWidth: "2px",
+        }}
+      ></div>
     </div>
   );
 };

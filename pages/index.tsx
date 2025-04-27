@@ -1,12 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Head from "next/head";
-import { fetchCryptoData } from "../utils/fetchCrypto";
+import {
+  fetchCryptoData,
+  lastApiRequest,
+  MIN_REQUEST_INTERVAL,
+} from "../utils/fetchCrypto";
 import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
 import CryptoList from "../components/CryptoList";
-import MarketOverview from "../components/MarketOverview";
 import { Coin } from "../types";
-import SortDropdown from "../components/SortDropdown";
+import ParticlesBackground from "../components/ParticlesBackground";
+
+// Only keep track of local time for UI purposes
+let lastApiRequestTime = 0;
 
 export default function Home() {
   const [coins, setCoins] = useState<Coin[]>([]);
@@ -15,29 +21,103 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [throttled, setThrottled] = useState(false);
+  const [nextRequestTime, setNextRequestTime] = useState<number>(0);
+
+  // Keep a cache of the last successful data fetch
+  const cachedData = useRef<{ coins: Coin[]; timestamp: number } | null>(null);
 
   useEffect(() => {
+    // Set neon theme
+    document.body.classList.add("neon-theme");
+
     fetchData();
 
-    // Refresh data every 5 minutes
-    const intervalId = setInterval(fetchData, 5 * 60 * 1000);
+    // Refresh data every minute, but respect the rate limiting
+    const intervalId = setInterval(fetchData, 60 * 1000);
 
-    return () => clearInterval(intervalId);
+    // Update timestamp every second to keep the countdown accurate
+    const timeUpdateInterval = setInterval(() => {
+      if (lastUpdated) {
+        setLastUpdated(new Date());
+      }
+
+      // Update the countdown for the next API request
+      if (throttled) {
+        setNextRequestTime(Date.now());
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+      clearInterval(timeUpdateInterval);
+      document.body.classList.remove("neon-theme");
+    };
   }, []);
 
   const fetchData = async () => {
     try {
-      setLoading(true);
+      // Don't show loading if we have cached data already
+      const hadCachedData = cachedData.current !== null;
+      setLoading(!hadCachedData);
       setError(null);
+
+      // Store the timestamp for this request
+      lastApiRequestTime = Date.now();
+
       const data = await fetchCryptoData();
-      setCoins(data);
-      setLastUpdated(new Date());
+
+      // If the API returned no data due to throttling, use cached data if available
+      if (data.length === 0) {
+        if (cachedData.current) {
+          // Use cached data
+          setCoins(cachedData.current.coins);
+          setThrottled(true);
+
+          // Only update the timestamp if we didn't have one before
+          if (!lastUpdated) {
+            setLastUpdated(new Date(cachedData.current.timestamp));
+          }
+
+          console.log("Using cached data due to API throttling");
+        } else {
+          // Only set error if we have no cached data
+          setError("API rate limit reached. Please try again in a minute.");
+        }
+      } else {
+        // Got fresh data
+        setCoins(data);
+        setLastUpdated(new Date());
+        setThrottled(false);
+
+        // Update cache
+        cachedData.current = {
+          coins: data,
+          timestamp: Date.now(),
+        };
+      }
     } catch (err) {
       console.error("Error fetching cryptocurrency data:", err);
-      setError("Failed to fetch market data. Please try again later.");
+
+      // If we have cached data, use it as a fallback
+      if (cachedData.current) {
+        setCoins(cachedData.current.coins);
+        setThrottled(true);
+      } else {
+        // Only set error if we have no cached data
+        setError("Failed to fetch market data. Please try again later.");
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper function to calculate time until next refresh
+  const getSecondsUntilNextRefresh = () => {
+    const timeUntilNextRefresh = Math.ceil(
+      (lastApiRequestTime + MIN_REQUEST_INTERVAL - Date.now()) / 1000
+    );
+    return timeUntilNextRefresh > 0 ? timeUntilNextRefresh : 60;
   };
 
   const handleSearch = (term: string) => {
@@ -48,16 +128,58 @@ export default function Home() {
     setSortBy(option);
   };
 
+  // Get top gainer and loser from the coins data
+  const getTopGainerAndLoser = () => {
+    if (!coins || coins.length === 0) {
+      return { gainer: null, loser: null };
+    }
+
+    const sortedByChange = [...coins].sort(
+      (a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h
+    );
+
+    return {
+      gainer: sortedByChange[0],
+      loser: sortedByChange[sortedByChange.length - 1],
+    };
+  };
+
+  // Calculate total market cap and 24h volume
+  const getTotalMarketStats = () => {
+    if (!coins || coins.length === 0) {
+      return { marketCap: "2.5T", volume: "120B" };
+    }
+
+    // Use actual data or fallback to mock data
+    const totalMarketCap = coins.reduce(
+      (sum, coin) => sum + (coin.market_cap || 0),
+      0
+    );
+    const total24hVolume = coins.reduce(
+      (sum, coin) => sum + (coin.total_volume || 0),
+      0
+    );
+
+    const formatLargeNumber = (num: number) => {
+      if (num >= 1e12) return `${(num / 1e12).toFixed(1)}T`;
+      if (num >= 1e9) return `${(num / 1e9).toFixed(1)}B`;
+      if (num >= 1e6) return `${(num / 1e6).toFixed(1)}M`;
+      return num.toString();
+    };
+
+    return {
+      marketCap: formatLargeNumber(totalMarketCap),
+      volume: formatLargeNumber(total24hVolume),
+    };
+  };
+
+  const { gainer, loser } = getTopGainerAndLoser();
+  const { marketCap, volume } = getTotalMarketStats();
+
   return (
-    <div className="bg-vintage-bg min-h-screen font-vintage-body relative overflow-hidden">
-      {/* Enhanced background pattern overlay */}
-      <div
-        className="absolute inset-0 z-0 bg-vintage-pattern opacity-15"
-        style={{
-          backgroundSize: "400px",
-          backgroundRepeat: "repeat",
-        }}
-      ></div>
+    <div className="min-h-screen relative app-background">
+      {/* Particle Background */}
+      <ParticlesBackground />
 
       <Head>
         <title>Cryptocurrency Price Tracker</title>
@@ -69,80 +191,130 @@ export default function Home() {
           name="description"
           content="Track cryptocurrency prices and market data"
         />
-        <link rel="icon" href="/images/artistic-bitcoin.svg" />
+        <link rel="icon" href="/images/crypto-icon.svg" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Merriweather:wght@300;400;700&family=Cinzel:wght@400;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
       </Head>
 
       <Navbar lastUpdated={lastUpdated} />
 
-      <main className="relative z-10 container mx-auto px-3 sm:px-6 py-4 sm:py-8">
-        <div className="mb-6 sm:mb-12 flex flex-col lg:flex-row justify-between items-center gap-4 sm:gap-6">
-          {/* Market Overview Button with ornate styling */}
-          <div className="w-full lg:w-1/3">
-            <div className="relative">
-              <div
-                className="bg-vintage-card-bg px-4 sm:px-6 py-3 sm:py-4 rounded-lg border-3 sm:border-4 border-vintage-card-border shadow-vintage-card text-center relative z-10"
-                style={{
-                  backgroundImage: "url('/images/vintage-texture.svg')",
-                  backgroundRepeat: "repeat",
-                  backgroundSize: "200px",
-                }}
-              >
-                {/* Corner decorations - smaller on mobile */}
-                <div className="absolute top-0 left-0 w-6 sm:w-8 h-6 sm:h-8 border-t-2 sm:border-t-3 border-l-2 sm:border-l-3 border-vintage-accent-pattern opacity-60 rounded-tl-sm"></div>
-                <div className="absolute top-0 right-0 w-6 sm:w-8 h-6 sm:h-8 border-t-2 sm:border-t-3 border-r-2 sm:border-r-3 border-vintage-accent-pattern opacity-60 rounded-tr-sm"></div>
-                <div className="absolute bottom-0 left-0 w-6 sm:w-8 h-6 sm:h-8 border-b-2 sm:border-b-3 border-l-2 sm:border-l-3 border-vintage-accent-pattern opacity-60 rounded-bl-sm"></div>
-                <div className="absolute bottom-0 right-0 w-6 sm:w-8 h-6 sm:h-8 border-b-2 sm:border-b-3 border-r-2 sm:border-r-3 border-vintage-accent-pattern opacity-60 rounded-br-sm"></div>
+      <main className="neon-container">
+        {throttled && (
+          <div className="bg-black/30 border-l-4 border-neon-cyan text-white p-2 rounded-sm mb-4 text-xs">
+            <span className="text-neon-cyan font-semibold mr-1">NOTE:</span>
+            Using cached data - new data available in{" "}
+            {getSecondsUntilNextRefresh()} seconds
+          </div>
+        )}
 
-                <h2 className="text-xl sm:text-2xl font-vintage-header text-vintage-header-text relative z-10 flex items-center justify-center">
-                  <span className="hidden sm:inline-block w-5 sm:w-7 h-px bg-vintage-card-border opacity-70 mr-2 sm:mr-3"></span>
-                  Market Overview
-                  <span className="hidden sm:inline-block w-5 sm:w-7 h-px bg-vintage-card-border opacity-70 ml-2 sm:ml-3"></span>
-                </h2>
+        <div className="mb-8">
+          {/* Market Overview Section */}
+          <div className="neon-market-overview">
+            <h2 className="neon-header-text">Market Overview</h2>
+            <div className="neon-gradient-bar"></div>
+
+            {/* Market Statistics */}
+            <div className="market-stats-container flex flex-col items-center">
+              {/* First row: Market Cap and Volume */}
+              <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-20 my-6 w-full">
+                {/* Total Market Cap */}
+                <div
+                  className="neon-stat neon-stat-market-cap"
+                  style={{ animationDelay: "0.1s" }}
+                >
+                  <span className="neon-stat-value">
+                    Total Market Cap: ${marketCap}
+                  </span>
+                </div>
+
+                {/* 24h Volume */}
+                <div
+                  className="neon-stat neon-stat-volume"
+                  style={{ animationDelay: "0.2s" }}
+                >
+                  <span className="neon-stat-value">24h Volume: ${volume}</span>
+                </div>
+              </div>
+
+              {/* Second row: Top Gainer and Loser */}
+              <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-20 mb-6 w-full">
+                {gainer && (
+                  <div
+                    className="neon-stat neon-stat-gainer"
+                    style={{ animationDelay: "0.3s" }}
+                  >
+                    <span className="neon-stat-value">
+                      Top Gainer:{" "}
+                      <span className="font-bold">{gainer.name}</span>{" "}
+                      <span className="neon-positive">
+                        +{gainer.price_change_percentage_24h.toFixed(2)}%
+                      </span>
+                    </span>
+                  </div>
+                )}
+
+                {loser && (
+                  <div
+                    className="neon-stat neon-stat-loser"
+                    style={{ animationDelay: "0.4s" }}
+                  >
+                    <span className="neon-stat-value">
+                      Top Loser: <span className="font-bold">{loser.name}</span>{" "}
+                      <span className="neon-negative">
+                        {loser.price_change_percentage_24h.toFixed(2)}%
+                      </span>
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="w-full lg:w-1/2 mt-4 sm:mt-0">
-            <SearchBar
-              onSearch={handleSearch}
-              placeholder="Search cryptocurrencies..."
-            />
+          <div className="flex flex-col lg:flex-row justify-between items-center gap-6 mt-8">
+            <div className="w-full lg:w-1/2">
+              <SearchBar
+                onSearch={handleSearch}
+                placeholder="Search cryptocurrencies..."
+              />
+            </div>
+
+            <div className="w-full lg:w-1/3 mt-4 lg:mt-0 text-center">
+              <button className="neon-count-button">
+                {coins.length} Cryptocurrencies
+              </button>
+            </div>
           </div>
         </div>
 
-        {loading && (
-          <div className="flex justify-center items-center my-8 sm:my-16">
-            <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-t-2 border-b-2 border-vintage-accent-pattern"></div>
-            <span className="ml-3 text-vintage-text text-sm sm:text-base font-vintage-body">
-              Loading market data...
-            </span>
+        {loading && !cachedData.current && (
+          <div className="flex justify-center items-center my-16">
+            <div className="neon-loader" aria-label="Loading"></div>
+            <p className="neon-text-primary ml-4">Loading market data...</p>
           </div>
         )}
 
-        {error && (
-          <div className="bg-red-900/30 border-3 sm:border-4 border-red-700 text-red-300 p-4 sm:p-6 rounded-lg my-6 sm:my-8 text-center">
-            <p className="font-vintage-body text-base sm:text-lg font-semibold mb-2">
-              MARKET DATA UNAVAILABLE
-            </p>
-            <p className="font-vintage-body text-sm sm:text-base mb-4">
-              {error}
-            </p>
+        {error && !cachedData.current && (
+          <div className="bg-black/20 border-l-4 border-neon-red text-white p-3 rounded-sm my-4 text-sm flex items-center justify-between">
+            <span>{error}</span>
             <button
               onClick={fetchData}
-              className="px-4 sm:px-6 py-2 bg-vintage-link text-white text-sm sm:text-base font-semibold rounded hover:bg-vintage-link-hover transition-colors"
+              className="neon-button text-xs py-1 px-3"
+              style={{
+                borderColor: "var(--neon-red)",
+                color: "var(--neon-red)",
+                boxShadow: "0 0 8px var(--neon-red)",
+              }}
             >
               Try Again
             </button>
           </div>
         )}
 
-        {!loading && !error && (
+        {!loading && coins.length > 0 && (
           <>
-            <div className="my-6 sm:my-8">
+            <div className="my-8">
               <CryptoList
                 coins={coins}
                 searchTerm={searchTerm}
@@ -150,18 +322,9 @@ export default function Home() {
               />
             </div>
 
-            {/* Ornate footer */}
-            <div className="relative text-center py-4 sm:py-6 mt-6 sm:mt-10">
-              <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-vintage-card-border to-transparent opacity-50"></div>
-              <div className="flex justify-center my-2">
-                <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-vintage-card-border mx-1 opacity-60"></div>
-                <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-vintage-card-border mx-1 opacity-60"></div>
-                <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-vintage-card-border mx-1 opacity-60"></div>
-              </div>
-              <p className="text-vintage-text font-vintage-body text-[10px] sm:text-xs">
-                Data provided by CoinGecko API | Updated every 5 minutes
-              </p>
-              <div className="absolute left-0 right-0 bottom-0 h-px bg-gradient-to-r from-transparent via-vintage-card-border to-transparent opacity-50"></div>
+            {/* Neon Footer */}
+            <div className="neon-footer">
+              Data provided by CoinGecko API | Updated every minute
             </div>
           </>
         )}

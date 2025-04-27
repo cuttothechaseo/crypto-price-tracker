@@ -3,46 +3,47 @@
 @tailwind utilities;
 
 /* Import fonts */
-@import url('https://fonts.googleapis.com/css2?family=Arvo:wght@400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap');
+
+/* Import the neon futuristic theme */
+@import './neon-theme.css';
+
+/* Default body styles */
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Neon theme styles */
+body.neon-theme {
+  background-color: var(--bg-deep-black);
+  color: var(--text-white);
+  font-family: 'Orbitron', sans-serif;
+}
 
 @layer base {
-  body {
-    @apply bg-vintage-bg text-vintage-text;
-    font-family: 'Merriweather', serif;
-    background-image: url('/images/vintage-background-pattern.svg'), url('/images/grain.png');
-    background-repeat: repeat;
-    position: relative;
-    overflow-x: hidden;
-  }
-  
-  /* Ornate border removed */
-  
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-vintage-header font-semibold text-vintage-header-text;
-  }
-  
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
   }
   
   ::-webkit-scrollbar-track {
-    @apply bg-vintage-bg;
+    background-color: rgba(12, 12, 36, 0.5);
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply bg-vintage-card-border hover:bg-vintage-accent-pattern;
+    background-color: var(--neon-cyan);
     border-radius: 4px;
+    box-shadow: 0 0 5px var(--neon-cyan);
   }
 
   /* Selection color */
   ::selection {
-    @apply bg-vintage-accent-pattern text-white;
+    background-color: var(--neon-magenta);
+    color: var(--text-white);
   }
 }
 

@@ -1,9 +1,16 @@
 import axios from 'axios';
 import { CryptoCoin, PriceHistoryData } from '../types';
+import { mockCryptoData } from './mockData';
 
 // Constants for API request
-const MIN_REQUEST_INTERVAL = 10000; // 10 seconds between requests
-let lastApiRequest = 0;
+export const MIN_REQUEST_INTERVAL = 60000; // 60 seconds (1 minute) between requests
+export let lastApiRequest = 0;
+
+// Store a cache of the last successful API request
+const dataCache: { coins: CryptoCoin[], timestamp: number } = { 
+  coins: [], 
+  timestamp: 0 
+};
 
 /**
  * Fetches cryptocurrency data from the CoinGecko API
@@ -13,8 +20,17 @@ export const fetchCryptoData = async (): Promise<CryptoCoin[]> => {
     // Check if we're making requests too frequently
     const now = Date.now();
     if (now - lastApiRequest < MIN_REQUEST_INTERVAL) {
-      console.warn('API requests too frequent, throttling');
-      return [];
+      console.warn(`API requests too frequent, throttling. Next request allowed in ${Math.ceil((lastApiRequest + MIN_REQUEST_INTERVAL - now) / 1000)} seconds.`);
+      
+      // Return cached data if we have it
+      if (dataCache.coins.length > 0) {
+        console.log('Using cached crypto data');
+        return dataCache.coins;
+      }
+      
+      // If no cache, return mock data
+      console.log('No cached data available, using mock data');
+      return mockCryptoData;
     }
     
     lastApiRequest = now;
@@ -41,9 +57,15 @@ export const fetchCryptoData = async (): Promise<CryptoCoin[]> => {
 
     if (!response.data || !Array.isArray(response.data)) {
       console.error('Invalid response format:', response.data);
-      return [];
+      
+      // Return cached data if we have it, otherwise mock data
+      return dataCache.coins.length > 0 ? dataCache.coins : mockCryptoData;
     }
 
+    // Update cache
+    dataCache.coins = response.data;
+    dataCache.timestamp = now;
+    
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -55,7 +77,9 @@ export const fetchCryptoData = async (): Promise<CryptoCoin[]> => {
       
       // Handle rate limiting (common with CoinGecko free tier)
       if (error.response?.status === 429) {
-        console.error('Rate limit exceeded.');
+        console.error('Rate limit exceeded. CoinGecko API rate limit reached.');
+        // Enforce a longer delay after hitting rate limit
+        lastApiRequest = Date.now() - MIN_REQUEST_INTERVAL + 120000; // Add 2 more minutes
       }
       
       // Handle timeout errors more specifically
@@ -66,7 +90,8 @@ export const fetchCryptoData = async (): Promise<CryptoCoin[]> => {
       console.error('Error fetching crypto data:', error);
     }
     
-    return [];
+    // Return cached data if we have it, otherwise mock data
+    return dataCache.coins.length > 0 ? dataCache.coins : mockCryptoData;
   }
 };
 
